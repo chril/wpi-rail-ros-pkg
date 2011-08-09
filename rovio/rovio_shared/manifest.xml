@@ -1,0 +1,21 @@
+<package>
+  <description brief="rovio_shared">
+
+     rovio_shared
+
+  </description>
+  <author>Russell Toris</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rovio_shared</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <rosdep name="curl"/>
+  
+  <export>
+	<cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lrovio_shared"/>
+	</export> 
+
+</package>
+
+
