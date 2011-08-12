@@ -45,7 +45,7 @@ rovio_http::~rovio_http()
   sem_destroy(&sem);
 }
 
-void rovio_http::send(char *url, std::string *buf)
+void rovio_http::send(const char *url, std::string *buf)
 {
   // wait for the curl handle to be free
   sem_wait(&sem);

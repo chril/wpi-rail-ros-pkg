@@ -5,12 +5,14 @@
  *      Author: rctoris
  */
 
+#include <iostream>
 #include <ros/ros.h>
 #include <rovio_ctrl/head_ctrl.h>
 #include <rovio_shared/rovio_http.h>
 #include <sstream>
 #include <std_msgs/String.h>
-#include <stdio.h>
+
+using namespace std;
 
 class head_controller
 {
@@ -25,7 +27,7 @@ private:
   bool head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, rovio_ctrl::head_ctrl::Response &resp);
 
   // host location of the Rovio
-  std::string host;
+  string host;
   // communicates with the Rovio
   rovio_http *rovio;
   // a handle for the node
@@ -39,26 +41,27 @@ private:
 
 head_controller::head_controller()
 {
-  std::string user;
-  std::string pass;
+  string user;
+  string pass;
 
   // check for all the correct parameters
-  if (!node.getParam("/rovio_ctrl/user", user))
+  if (!node.getParam(USER, user))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/user' not found.");
+    ROS_ERROR("Parameter %s not found.", USER);
     exit(-1);
   }
-  if (!node.getParam("/rovio_ctrl/pass", pass))
+  if (!node.getParam(PASS, pass))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/pass' not found.");
+    ROS_ERROR("Parameter %s not found.", PASS);
     exit(-1);
   }
-  if (!node.getParam("/rovio_ctrl/host", host))
+  if (!node.getParam(HOST, host))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/host' not found.");
+    ROS_ERROR("Parameter %s not found.", HOST);
     exit(-1);
   }
 
+  // create the communication object to talk to Rovio
   rovio = new rovio_http(user, pass);
 
   // add services and published topics
@@ -86,10 +89,10 @@ bool head_controller::head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, ro
   }
 
   // build the URL command and send it
-  char url[URL_BUF_SIZE];
-  snprintf(url, URL_BUF_SIZE, "http://%s/rev.cgi?Cmd=nav&action=18&drive=%i", host.c_str(), req.head_pos);
-  std::string buf = "";
-  rovio->send(url, &buf);
+  stringstream ss;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << req.head_pos;
+  string buf = "";
+  rovio->send(ss.str().c_str(), &buf);
 
   // parse out the response
   int resp_code = -1;
@@ -102,18 +105,18 @@ bool head_controller::head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, ro
 void head_controller::pub_head_sensor()
 {
   // build the URL command and send it
-  char url[URL_BUF_SIZE];
-  snprintf(url, URL_BUF_SIZE, "http://%s/rev.cgi?Cmd=nav&action=1", host.c_str());
-  std::string buf = "";
-  rovio->send(url, &buf);
+  stringstream ss;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=1";
+  string buf = "";
+  rovio->send(ss.str().c_str(), &buf);
 
   // parse out the response
   int resp_code = -1;
   sscanf(strstr(buf.c_str(), "head_position="), "head_position=%i", &resp_code);
 
   // decide which head position the Rovio is in
+  ss.str("");
   std_msgs::String msg;
-  std::stringstream ss;
   if (resp_code > 140)
   {
     ss << "HEAD_DOWN";

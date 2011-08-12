@@ -10,6 +10,8 @@
 #include <rovio_shared/man_drv.h>
 #include <rovio_shared/rovio_http.h>
 
+using namespace std;
+
 class move_controller
 {
 public:
@@ -21,7 +23,7 @@ private:
   void man_drv_callback(const rovio_shared::man_drv::ConstPtr &msg);
 
   // host location of the Rovio
-  std::string host;
+  string host;
   // communicates with the Rovio
   rovio_http *rovio;
   // a handle for the node
@@ -33,26 +35,27 @@ private:
 
 move_controller::move_controller()
 {
-  std::string user;
-  std::string pass;
+  string user;
+  string pass;
 
   // check for all the correct parameters
-  if (!node.getParam("/rovio_ctrl/user", user))
+  if (!node.getParam(USER, user))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/user' not found.");
+    ROS_ERROR("Parameter %s not found.", USER);
     exit(-1);
   }
-  if (!node.getParam("/rovio_ctrl/pass", pass))
+  if (!node.getParam(PASS, pass))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/pass' not found.");
+    ROS_ERROR("Parameter %s not found.", PASS);
     exit(-1);
   }
-  if (!node.getParam("/rovio_ctrl/host", host))
+  if (!node.getParam(HOST, host))
   {
-    ROS_ERROR("Parameter '/rovio_ctrl/host' not found.");
+    ROS_ERROR("Parameter %s not found.", HOST);
     exit(-1);
   }
 
+  // create the communication object to talk to Rovio
   rovio = new rovio_http(user, pass);
 
   // add subscriptions that will control the Rovio
@@ -83,11 +86,9 @@ void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &ms
   }
 
   // build the URL command and send it
-  char url[URL_BUF_SIZE];
-  snprintf(url, URL_BUF_SIZE, "http://%s/rev.cgi?Cmd=nav&action=18&drive=%i&speed=%i", host.c_str(), msg->drive,
-           msg->speed);
-
-  rovio->send(url);
+  stringstream ss;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << msg->drive << "&speed=" << msg->speed;
+  rovio->send(ss.str().c_str());
 }
 
 int main(int argc, char **argv)

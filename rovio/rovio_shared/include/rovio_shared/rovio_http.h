@@ -14,6 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// name of the variables that should contain login information
+#define USER "/rovio_ctrl/user"
+#define PASS "/rovio_ctrl/pass"
+#define HOST "/rovio_ctrl/host"
+
 // maximum size of a URL
 #define URL_BUF_SIZE 256
 
@@ -23,7 +28,7 @@ public:
   rovio_http(std::string user, std::string pass);
   virtual ~rovio_http();
 
-  void send(char *url, std::string *buf=NULL);
+  void send(const char *url, std::string *buf=NULL);
 
 private:
   CURL *curl; // used to communicate with the Rovio
