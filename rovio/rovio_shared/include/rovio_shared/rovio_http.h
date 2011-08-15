@@ -1,15 +1,15 @@
 /*
- * rovio_http.h
+ * The rovio_http object can be used to send HTTP commands to the Rovio and read in server responses. It is intended to be used by other Rovio packages.
  *
- *  Created on: Aug 7, 2011
- *      Author: rctoris
+ * Author: Russell Toris, WPI - rctoris@wpi.edu
+ * Version: August 15, 2011
  */
 
 #ifndef ROVIO_HTTP_H_
 #define ROVIO_HTTP_H_
 
 #include <curl/curl.h>
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,20 +19,19 @@
 #define PASS "/rovio_ctrl/pass"
 #define HOST "/rovio_ctrl/host"
 
-// maximum size of a URL
-#define URL_BUF_SIZE 256
-
 class rovio_http
 {
 public:
   rovio_http(std::string user, std::string pass);
   virtual ~rovio_http();
 
-  void send(const char *url, std::string *buf=NULL);
+  void send(const char *url, std::string *buf = NULL);
 
 private:
-  CURL *curl; // used to communicate with the Rovio
-  sem_t sem; // used to ensure only one call to Curl occurs
+  // used to communicate with the Rovio
+  CURL *curl;
+  // used to ensure only one call to Curl occurs
+  sem_t sem;
 };
 
-#endif /* ROVIO_HTTP_H_ */
+#endif

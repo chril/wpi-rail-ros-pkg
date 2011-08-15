@@ -1,12 +1,17 @@
 /*
- * rovio_http.cpp
+ * The rovio_http object can be used to send HTTP commands to the Rovio and read in server responses. It is intended to be used by other Rovio packages.
  *
- *  Created on: Aug 7, 2011
- *      Author: rctoris
+ * Author: Russell Toris, WPI - rctoris@wpi.edu
+ * Version: August 15, 2011
  */
 
 #include "rovio_shared/rovio_http.h"
 
+using namespace std;
+
+/*!
+ * The callback function used by Curl to store the response from the Rovio. This function should only be used by Curl internally by the rovio_http.
+ */
 size_t write_data(char *ptr, size_t size, size_t nmemb, std::string *buf)
 {
   // the actual size of the data
@@ -18,7 +23,13 @@ size_t write_data(char *ptr, size_t size, size_t nmemb, std::string *buf)
   return tot_s;
 }
 
-rovio_http::rovio_http(std::string user, std::string pass)
+/*!
+ * Create a rovio_http object that can be used to send HTTP commands to the Rovio. A valid username and password must be provide at construction.
+ *
+ * \param user the username used to authenticate with the Rovio
+ * \param pass the password used to authenticate with the Rovio
+ */
+rovio_http::rovio_http(string user, string pass)
 {
   // create the CURL handle
   curl = curl_easy_init();
@@ -37,6 +48,9 @@ rovio_http::rovio_http(std::string user, std::string pass)
   sem_init(&sem, 0, 1);
 }
 
+/*!
+ * Cleanup any resources from the rovio_http object and from Curl.
+ */
 rovio_http::~rovio_http()
 {
   // cleanup anything left by Curl
@@ -45,7 +59,13 @@ rovio_http::~rovio_http()
   sem_destroy(&sem);
 }
 
-void rovio_http::send(const char *url, std::string *buf)
+/*!
+ * Send the given full URL command to the Rovio. An optional buffer can be given if the returned output is needed. This string buffer should be initialized to the empty string.
+ *
+ * \param url the full URL command to send to the Rovio
+ * \param buf an optional empty string buffer for the response to be stored in
+ */
+void rovio_http::send(const char *url, string *buf)
 {
   // wait for the curl handle to be free
   sem_wait(&sem);
@@ -53,7 +73,7 @@ void rovio_http::send(const char *url, std::string *buf)
   if (buf == NULL)
   {
     // to be thrown away afterwards
-    std::string resp_buf = "";
+    string resp_buf = "";
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp_buf);
   }
   else
