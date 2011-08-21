@@ -1,0 +1,17 @@
+<package>
+  <description brief="rovio_av">
+
+     rovio_av
+
+  </description>
+  <author>Russell Toris</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rovio_av</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="rovio_shared"/>
+
+</package>
+
+
