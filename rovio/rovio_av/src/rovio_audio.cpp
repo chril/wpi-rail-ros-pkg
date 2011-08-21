@@ -5,24 +5,138 @@
  *      Author: rctoris
  */
 
+#include <arpa/inet.h>
+#include <cstdlib>
 #include <ros/ros.h>
+#include <rovio_av/wav_play.h>
+#include <rovio_shared/rovio_http.h>
+#include <stdio.h>
+#include <string>
+#include <sstream>
+#include <sys/socket.h>
+
+using namespace std;
 
 class audio_controller
 {
 public:
   audio_controller();
   ~audio_controller();
+
+private:
+  // service callbacks
+  bool wav_play_callback(rovio_av::wav_play::Request &req, rovio_av::wav_play::Response &resp);
+
+  // authentication information for the Rovio
+  string host;
+  string user;
+  string pass;
+
+  // a handle for the node
+  ros::NodeHandle node;
+
+  // services
+  ros::ServiceServer wav_play;
 };
 
 audio_controller::audio_controller()
 {
-  // TODO Auto-generated constructor stub
+  // check for all the correct parameters
+  if (!node.getParam(USER, user))
+  {
+    ROS_ERROR("Parameter %s not found.", USER);
+    exit(-1);
+  }
+  if (!node.getParam(PASS, pass))
+  {
+    ROS_ERROR("Parameter %s not found.", PASS);
+    exit(-1);
+  }
+  if (!node.getParam(HOST, host))
+  {
+    ROS_ERROR("Parameter %s not found.", HOST);
+    exit(-1);
+  }
 
+  // add services
+  wav_play = node.advertiseService("wav_play", &audio_controller::wav_play_callback, this);
+
+  ROS_INFO("Rovio Audio Controller Initialized");
 }
 
 audio_controller::~audio_controller()
 {
-  // TODO Auto-generated destructor stub
+  //TODO: this?
+}
+
+bool audio_controller::wav_play_callback(rovio_av::wav_play::Request &req, rovio_av::wav_play::Response &resp)
+{
+  // create a socket to talk to the Rovio
+  int audio_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (audio_socket < 0)
+  {
+    ROS_ERROR("Audio socket could not be created.");
+    return false;
+  }
+
+  // setup the address
+  struct sockaddr_in host_addr;
+  memset(&host_addr, 0, sizeof(host_addr));
+  host_addr.sin_family = AF_INET;
+  host_addr.sin_addr.s_addr = inet_addr(host.c_str());
+  host_addr.sin_port = htons(80);
+
+  // connect the socket
+  if (connect(audio_socket, (struct sockaddr *)&host_addr, sizeof(host_addr)) < 0)
+  {
+    ROS_ERROR("Audio socket could not be connected.");
+    return false;
+  }
+
+  // get the file name from the request
+  string f_name = req.f;
+
+  // try and open the file
+  FILE *f = fopen(f_name.c_str(), "rb");
+  if (f == NULL)
+  {
+    ROS_ERROR("Could not open file '%s'.", f_name.c_str());
+    return false;
+  }
+
+  // find out how big the file is
+  fseek(f, 0, SEEK_END);
+  long f_size = ftell(f);
+  rewind(f);
+  // create a buffer and read in the entire file
+  char *buf = (char*)malloc(f_size);
+  if (fread(buf, 1, f_size, f) != f_size)
+  {
+    ROS_ERROR("Error reading file '%s'.", f_name.c_str());
+    return false;
+  }
+
+  // build the header
+  stringstream ss;
+  ss << "POST /GetAudio.cgi HTTP/1.1\r\n" << "User-Agent: AudioAgent\r\n" << "Host: " << host << "\r\n"
+      << "Content-Length: " << f_size << "\r\n" << "Cache-Control: no-cache\r\n" << "\r\n";
+
+  // send the sound file
+  send(audio_socket, ss.str().c_str(), ss.str().size(), 0);
+  if (send(audio_socket, buf, f_size, 0) != f_size)
+  {
+    ROS_ERROR("Could not send entire file.");
+    return false;
+  }
+
+  // close the file
+  fclose(f);
+  // free the buffer
+  free(buf);
+  // close the socket
+  close(audio_socket);
+
+  return true;
 }
 
 int main(int argc, char **argv)
