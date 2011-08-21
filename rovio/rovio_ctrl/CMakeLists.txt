@@ -33,6 +33,8 @@ INCLUDE (FindCURL)
 
 rosbuild_add_executable(rovio_move src/rovio_move)
 rosbuild_add_executable(rovio_head src/rovio_head)
+rosbuild_add_executable(rovio_teleop src/rovio_teleop)
 
 target_link_libraries(rovio_move ${CURL_LIBRARIES})
 target_link_libraries(rovio_head ${CURL_LIBRARIES})
+target_link_libraries(rovio_teleop ${CURL_LIBRARIES})

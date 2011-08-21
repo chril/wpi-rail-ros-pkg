@@ -5,10 +5,11 @@
  *      Author: rctoris
  */
 
-#include <stdio.h>
 #include <ros/ros.h>
 #include <rovio_shared/man_drv.h>
 #include <rovio_shared/rovio_http.h>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -59,7 +60,7 @@ move_controller::move_controller()
   rovio = new rovio_http(user, pass);
 
   // add subscriptions that will control the Rovio
-  man_drv = node.subscribe<rovio_shared::man_drv> ("man_drv", 32, &move_controller::man_drv_callback, this);
+  man_drv = node.subscribe<rovio_shared::man_drv> ("man_drv", 8, &move_controller::man_drv_callback, this);
 
   ROS_INFO("Rovio Move Controller Initialized");
 }
@@ -72,7 +73,6 @@ move_controller::~move_controller()
 
 void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &msg)
 {
-
   // check to see if all the requests are valid
   if (msg->drive < msg->rovio_shared::man_drv::MIN_DRIVE_VAL || msg->drive > rovio_shared::man_drv::MAX_DRIVE_VAL)
   {
@@ -87,7 +87,8 @@ void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &ms
 
   // build the URL command and send it
   stringstream ss;
-  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int) msg->drive << "&speed=" << (int) msg->speed;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int)msg->drive << "&speed="
+      << (int)msg->speed;
   rovio->send(ss.str().c_str());
 }
 
@@ -99,8 +100,8 @@ int main(int argc, char **argv)
   // initialize the Rovio controller
   move_controller controller;
 
-  // update at 10 Hz
-  ros::Rate loop_rate(10);
+  // update at 5 Hz
+  ros::Rate loop_rate(5);
   // continue until a ctrl-c has occurred
   while (ros::ok())
   {

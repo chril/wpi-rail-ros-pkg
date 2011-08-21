@@ -11,8 +11,6 @@
 #include <curl/curl.h>
 #include <ros/ros.h>
 #include <semaphore.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 // name of the variables that should contain login information
 #define USER "/rovio_shared/user"

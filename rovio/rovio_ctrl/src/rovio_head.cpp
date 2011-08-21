@@ -5,12 +5,12 @@
  *      Author: rctoris
  */
 
-#include <iostream>
 #include <ros/ros.h>
 #include <rovio_ctrl/head_ctrl.h>
 #include <rovio_shared/rovio_http.h>
 #include <sstream>
 #include <std_msgs/String.h>
+#include <string>
 
 using namespace std;
 
@@ -66,7 +66,7 @@ head_controller::head_controller()
 
   // add services and published topics
   head_ctrl = node.advertiseService("head_ctrl", &head_controller::head_ctrl_callback, this);
-  head_sensor = node.advertise<std_msgs::String> ("head_sensor", 1024);
+  head_sensor = node.advertise<std_msgs::String> ("head_sensor", 8);
 
   ROS_INFO("Rovio Head Controller Initialized");
 }
@@ -142,8 +142,8 @@ int main(int argc, char **argv)
   // initialize the Rovio controller
   head_controller controller;
 
-  // update at 10 Hz
-  ros::Rate loop_rate(10);
+  // update at 5 Hz
+  ros::Rate loop_rate(5);
   // continue until a ctrl-c has occurred
   while (ros::ok())
   {
