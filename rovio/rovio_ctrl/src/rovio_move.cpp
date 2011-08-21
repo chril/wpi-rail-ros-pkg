@@ -87,7 +87,7 @@ void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &ms
 
   // build the URL command and send it
   stringstream ss;
-  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << msg->drive << "&speed=" << msg->speed;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int) msg->drive << "&speed=" << (int) msg->speed;
   rovio->send(ss.str().c_str());
 }
 

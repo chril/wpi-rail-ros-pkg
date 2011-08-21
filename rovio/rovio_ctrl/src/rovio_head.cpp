@@ -90,7 +90,7 @@ bool head_controller::head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, ro
 
   // build the URL command and send it
   stringstream ss;
-  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << req.head_pos;
+  ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int)req.head_pos;
   string buf = "";
   rovio->send(ss.str().c_str(), &buf);
 

@@ -15,9 +15,9 @@
 #include <stdlib.h>
 
 // name of the variables that should contain login information
-#define USER "/rovio_ctrl/user"
-#define PASS "/rovio_ctrl/pass"
-#define HOST "/rovio_ctrl/host"
+#define USER "/rovio_shared/user"
+#define PASS "/rovio_shared/pass"
+#define HOST "/rovio_shared/host"
 
 class rovio_http
 {
