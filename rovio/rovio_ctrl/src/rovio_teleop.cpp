@@ -6,6 +6,7 @@
  */
 
 #include <ros/ros.h>
+#include <rovio_ctrl/head_ctrl.h>
 #include <rovio_shared/man_drv.h>
 #include <rovio_shared/rovio_http.h>
 #include <signal.h>
@@ -16,10 +17,25 @@
 using namespace std;
 
 // keycodes for the controller
-#define W 0x77
-#define A 0x61
-#define S 0x73
-#define D 0x64
+#define KEY_W 0x77
+#define KEY_A 0x61
+#define KEY_S 0x73
+#define KEY_D 0x64
+#define KEY_Q 0x71
+#define KEY_E 0x65
+#define KEY_1 0x31
+#define KEY_2 0x32
+#define KEY_3 0x33
+#define KEY_4 0x34
+#define KEY_5 0x35
+#define KEY_6 0x36
+#define KEY_7 0x37
+#define KEY_8 0x38
+#define KEY_9 0x39
+#define KEY_0 0x30
+#define KEY_LT 0x2C
+#define KEY_GT 0x2E
+#define KEY_FSLASH 0x2F
 
 // terminal modes for reading input
 struct termios buffered, raw;
@@ -44,8 +60,11 @@ private:
   // a handle for the node
   ros::NodeHandle node;
 
-  // published topics
+  // published topics and clients
   ros::Publisher man_drive;
+  ros::ServiceClient head_ctrl;
+
+  int speed;
 };
 
 teleop_controller::teleop_controller()
@@ -73,8 +92,12 @@ teleop_controller::teleop_controller()
   // create the communication object to talk to Rovio
   rovio = new rovio_http(user, pass);
 
-  // create the published topic
+  // create the published topic and client
   man_drive = node.advertise<rovio_shared::man_drv> ("man_drv", 8);
+  head_ctrl = node.serviceClient<rovio_ctrl::head_ctrl> ("head_ctrl");
+
+  // start off with a speed of 5
+  speed = 5;
 
   // put the terminal in raw mode
   tcgetattr(0, &buffered);
@@ -84,7 +107,7 @@ teleop_controller::teleop_controller()
   raw.c_cc[VEOF] = 2;
   tcsetattr(0, TCSANOW, &raw);
 
-  ROS_INFO("Rovio Teleop Controller Initialized");
+  ROS_INFO("Rovio Keyboard Teleop Started");
 }
 
 teleop_controller::~teleop_controller()
@@ -101,38 +124,125 @@ void teleop_controller::run()
   // continue until we have an input error
   while (read(0, &c, 1))
   {
-    // create the message
+    // create the message for a speed message and request for the head
     rovio_shared::man_drv msg;
-
-    //TODO: let user control speed
-    msg.speed = 5;
+    rovio_ctrl::head_ctrl srv;
 
     // parse the message
     switch (c)
     {
-      case W:
-        msg.drive = 1;
+      case KEY_W:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::FORWARD;
         break;
-      case A:
-        msg.drive = 3;
+      case KEY_A:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::STRAIGHT_LEFT;
         break;
-      case S:
-        msg.drive = 2;
+      case KEY_S:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::BACKWARD;
         break;
-      case D:
-        msg.drive = 4;
+      case KEY_D:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::STRAIGHT_RIGHT;
+        break;
+      case KEY_Q:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::ROTATE_LEFT;
+        break;
+      case KEY_E:
+        srv.request.head_pos = -1;
+        msg.drive = rovio_shared::man_drv::ROTATE_RIGHT;
+        break;
+      case KEY_1:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        msg.speed = 1;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_2:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 2;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_3:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 3;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_4:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 4;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_5:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 5;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_6:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 6;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_7:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 7;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_8:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 8;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_9:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 9;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_0:
+        srv.request.head_pos = -1;
+        msg.drive = -1;
+        speed = 10;
+        ROS_INFO("Speed set to %i", speed);
+        break;
+      case KEY_LT:
+        msg.drive = -1;
+        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_DOWN;
+        break;
+      case KEY_GT:
+        msg.drive = -1;
+        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_MIDDLE;
+        break;
+      case KEY_FSLASH:
+        msg.drive = -1;
+        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_UP;
         break;
       default:
-        //TODO: other commands
         // not a valid key
         msg.drive = -1;
+        srv.request.head_pos = -1;
         break;
     }
+    //set the speed
+    msg.speed = speed;
 
     // check if a valid key was pressed
     if (msg.drive != -1)
       // publish the message
       man_drive.publish(msg);
+    else if (srv.request.head_pos != -1)
+      // send the request
+      head_ctrl.call(srv);
   }
 }
 

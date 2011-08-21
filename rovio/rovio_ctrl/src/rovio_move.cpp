@@ -74,7 +74,7 @@ move_controller::~move_controller()
 void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &msg)
 {
   // check to see if all the requests are valid
-  if (msg->drive < msg->rovio_shared::man_drv::MIN_DRIVE_VAL || msg->drive > rovio_shared::man_drv::MAX_DRIVE_VAL)
+  if (msg->drive < rovio_shared::man_drv::MIN_DRIVE_VAL || msg->drive > rovio_shared::man_drv::MAX_DRIVE_VAL)
   {
     ROS_ERROR("Manual Drive 'drive' value of %i out of range [%i,%i].", msg->drive, rovio_shared::man_drv::MIN_DRIVE_VAL, rovio_shared::man_drv::MAX_DRIVE_VAL);
     return;
