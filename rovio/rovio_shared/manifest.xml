@@ -1,9 +1,5 @@
 <package>
-  <description brief="rovio_shared">
-
-     rovio_shared
-
-  </description>
+  <description brief="rovio_shared">The rovio_shared package contains standard messages as well as a library that can be used to communicate with a WowWee Rovio.</description>
   <author>Russell Toris</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
@@ -14,8 +10,7 @@
   
   <export>
 	<cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lrovio_shared"/>
-	</export> 
-
+  </export> 
 </package>
 
 
