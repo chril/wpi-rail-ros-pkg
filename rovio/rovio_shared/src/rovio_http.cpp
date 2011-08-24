@@ -12,15 +12,32 @@ using namespace std;
 /*!
  * The callback function used by Curl to store the response from the Rovio. This function should only be used by Curl internally by the rovio_http.
  */
-size_t write_data(char *ptr, size_t size, size_t nmemb, std::string *buf)
+size_t write_data(char *ptr, size_t size, size_t nmemb, rovio_response *buf)
 {
   // the actual size of the data
-  size_t tot_s = size * nmemb;
+  buf->size = size * nmemb;
 
-  //add the data to the buffer
-  buf->append((char*)ptr, tot_s);
+  // add the data to the buffer
+  if (buf->size > 0)
+  {
+    buf->data = (char *)malloc(buf->size);
+    memcpy(buf->data, ptr, buf->size);
+  }
 
-  return tot_s;
+  return buf->size;
+}
+
+/*!
+ * Cleanup any resources used by a rovio_response struct.
+ *
+ * \param resp the rovio_response struct to cleanup
+ */
+void rovio_response_clean(rovio_response *resp)
+{
+  if (resp)
+  {
+    //TODO: this.
+  }
 }
 
 /*!
@@ -60,28 +77,25 @@ rovio_http::~rovio_http()
 }
 
 /*!
- * Send the given full URL command to the Rovio. An optional buffer can be given if the returned output is needed. This string buffer should be initialized to the empty string.
+ * Send the given full URL command to the Rovio. A buffer containing the response is returned.
  *
  * \param url the full URL command to send to the Rovio
- * \param buf an optional empty string buffer for the response to be stored in
+ * \return a buffer containing the response from the Rovio
  */
-void rovio_http::send(const char *url, string *buf)
+rovio_response *rovio_http::send(const char *url)
 {
   // wait for the curl handle to be free
   sem_wait(&sem);
-  // check if we are saving the data
-  if (buf == NULL)
-  {
-    // to be thrown away afterwards
-    string resp_buf = "";
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp_buf);
-  }
-  else
-  {
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, buf);
-  }
+
+  // resized later if needed
+  rovio_response *resp = (rovio_response *)malloc(sizeof(rovio_response));
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
+
   //send the command to the Rovio
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_perform(curl);
+
   sem_post(&sem);
+
+  return resp;
 }

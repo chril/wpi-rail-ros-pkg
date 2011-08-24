@@ -89,7 +89,9 @@ void move_controller::man_drv_callback(const rovio_shared::man_drv::ConstPtr &ms
   stringstream ss;
   ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int)msg->drive << "&speed="
       << (int)msg->speed;
-  rovio->send(ss.str().c_str());
+
+  rovio_response *buf = rovio->send(ss.str().c_str());
+  rovio_response_clean(buf);
 }
 
 int main(int argc, char **argv)

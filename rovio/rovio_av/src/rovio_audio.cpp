@@ -21,7 +21,6 @@ class audio_controller
 {
 public:
   audio_controller();
-  ~audio_controller();
 
 private:
   // service callbacks
@@ -62,11 +61,6 @@ audio_controller::audio_controller()
   wav_play = node.advertiseService("wav_play", &audio_controller::wav_play_callback, this);
 
   ROS_INFO("Rovio Audio Controller Initialized");
-}
-
-audio_controller::~audio_controller()
-{
-  //TODO: this?
 }
 
 bool audio_controller::wav_play_callback(rovio_av::wav_play::Request &req, rovio_av::wav_play::Response &resp)
@@ -110,7 +104,7 @@ bool audio_controller::wav_play_callback(rovio_av::wav_play::Request &req, rovio
   rewind(f);
   // create a buffer and read in the entire file
   char *buf = (char*)malloc(f_size);
-  if (fread(buf, 1, f_size, f) != f_size)
+  if ((long) fread(buf, 1, f_size, f) != f_size)
   {
     ROS_ERROR("Error reading file '%s'.", f_name.c_str());
     return false;

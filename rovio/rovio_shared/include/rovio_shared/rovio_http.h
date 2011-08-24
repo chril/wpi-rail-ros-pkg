@@ -17,13 +17,21 @@
 #define PASS "/rovio_shared/pass"
 #define HOST "/rovio_shared/host"
 
+typedef struct
+{
+  char *data;
+  size_t size;
+} rovio_response;
+
+void rovio_response_clean(rovio_response *resp);
+
 class rovio_http
 {
 public:
   rovio_http(std::string user, std::string pass);
   virtual ~rovio_http();
 
-  void send(const char *url, std::string *buf = NULL);
+  rovio_response *send(const char *url);
 
 private:
   // used to communicate with the Rovio

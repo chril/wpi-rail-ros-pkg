@@ -91,14 +91,14 @@ bool head_controller::head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, ro
   // build the URL command and send it
   stringstream ss;
   ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=18&drive=" << (int)req.head_pos;
-  string buf = "";
-  rovio->send(ss.str().c_str(), &buf);
+  rovio_response *buf = rovio->send(ss.str().c_str());
 
   // parse out the response
   int resp_code = -1;
-  sscanf(strstr(buf.c_str(), "responses = "), "responses = %i", &resp_code);
+  sscanf(strstr(buf->data, "responses = "), "responses = %i", &resp_code);
   resp.response = resp_code;
 
+  rovio_response_clean(buf);
   return true;
 }
 
@@ -107,12 +107,11 @@ void head_controller::pub_head_sensor()
   // build the URL command and send it
   stringstream ss;
   ss << "http://" << host.c_str() << "/rev.cgi?Cmd=nav&action=1";
-  string buf = "";
-  rovio->send(ss.str().c_str(), &buf);
+  rovio_response *buf = rovio->send(ss.str().c_str());
 
   // parse out the response
   int resp_code = -1;
-  sscanf(strstr(buf.c_str(), "head_position="), "head_position=%i", &resp_code);
+  sscanf(strstr(buf->data, "head_position="), "head_position=%i", &resp_code);
 
   // decide which head position the Rovio is in
   ss.str("");
@@ -132,6 +131,8 @@ void head_controller::pub_head_sensor()
 
   msg.data = ss.str();
   head_sensor.publish(msg);
+
+  rovio_response_clean(buf);
 }
 
 int main(int argc, char **argv)
