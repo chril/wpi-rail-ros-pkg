@@ -14,17 +14,30 @@ using namespace std;
  */
 size_t write_data(char *ptr, size_t size, size_t nmemb, rovio_response *buf)
 {
-  // the actual size of the data
-  buf->size = size * nmemb;
+  // actual size of the new data
+  size_t new_data = size * nmemb;
 
-  // add the data to the buffer
-  if (buf->size > 0)
+  // see if there is any data
+  if (new_data > 0)
   {
-    buf->data = (char *)malloc(buf->size);
-    memcpy(buf->data, ptr, buf->size);
+
+    // check if the buffer already has data
+    if (buf->data)
+      // resize the buffer
+      buf->data = (char *)realloc(buf->data, buf->size + new_data + 1);
+    else
+      // allocate the initial memory
+      buf->data = (char *)malloc(new_data + 1);
+
+    // add the data to the buffer
+    memcpy(&(buf->data[buf->size]), ptr, new_data);
+    //update the size
+    buf->size += new_data;
+    // null terminate
+    buf->data[buf->size] = NULL;
   }
 
-  return buf->size;
+  return new_data;
 }
 
 /*!
@@ -89,8 +102,10 @@ rovio_response *rovio_http::send(const char *url)
   // wait for the curl handle to be free
   sem_wait(&sem);
 
-  // resized later if needed
+  // create the response for the Rovio
   rovio_response *resp = (rovio_response *)malloc(sizeof(rovio_response));
+  resp->size = 0;
+  resp->data = NULL;
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
 
   //send the command to the Rovio
