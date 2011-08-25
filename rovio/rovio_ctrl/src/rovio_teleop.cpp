@@ -8,7 +8,6 @@
 #include <ros/ros.h>
 #include <rovio_ctrl/head_ctrl.h>
 #include <rovio_shared/man_drv.h>
-#include <rovio_shared/rovio_http.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string>
@@ -49,14 +48,9 @@ class teleop_controller
 {
 public:
   teleop_controller();
-  ~teleop_controller();
   void run();
 
 private:
-  // host location of the Rovio
-  string host;
-  // communicates with the Rovio
-  rovio_http *rovio;
   // a handle for the node
   ros::NodeHandle node;
 
@@ -69,29 +63,6 @@ private:
 
 teleop_controller::teleop_controller()
 {
-  string user;
-  string pass;
-
-  // check for all the correct parameters
-  if (!node.getParam(USER, user))
-  {
-    ROS_ERROR("Parameter %s not found.", USER);
-    exit(-1);
-  }
-  if (!node.getParam(PASS, pass))
-  {
-    ROS_ERROR("Parameter %s not found.", PASS);
-    exit(-1);
-  }
-  if (!node.getParam(HOST, host))
-  {
-    ROS_ERROR("Parameter %s not found.", HOST);
-    exit(-1);
-  }
-
-  // create the communication object to talk to Rovio
-  rovio = new rovio_http(user, pass);
-
   // create the published topic and client
   man_drive = node.advertise<rovio_shared::man_drv> ("man_drv", 8);
   head_ctrl = node.serviceClient<rovio_ctrl::head_ctrl> ("head_ctrl");
@@ -108,12 +79,6 @@ teleop_controller::teleop_controller()
   tcsetattr(0, TCSANOW, &raw);
 
   ROS_INFO("Rovio Keyboard Teleop Started");
-}
-
-teleop_controller::~teleop_controller()
-{
-  // free up the rovio_http object
-  delete rovio;
 }
 
 void teleop_controller::run()
