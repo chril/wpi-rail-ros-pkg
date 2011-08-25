@@ -60,7 +60,7 @@ move_controller::move_controller()
   rovio = new rovio_http(user, pass);
 
   // add subscriptions that will control the Rovio
-  man_drv = node.subscribe<rovio_shared::man_drv> ("man_drv", 8, &move_controller::man_drv_callback, this);
+  man_drv = node.subscribe<rovio_shared::man_drv> ("man_drv", 2, &move_controller::man_drv_callback, this);
 
   ROS_INFO("Rovio Move Controller Initialized");
 }

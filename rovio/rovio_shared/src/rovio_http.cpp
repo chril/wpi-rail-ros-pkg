@@ -36,7 +36,9 @@ void rovio_response_clean(rovio_response *resp)
 {
   if (resp)
   {
-    //TODO: this.
+    if (resp->data)
+      free(resp->data);
+    free(resp);
   }
 }
 
