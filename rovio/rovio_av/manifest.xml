@@ -1,5 +1,5 @@
 <package>
-  <description brief="rovio_av">The rovio_av package contains nodes to control and query the audio/video devices on a WowWee Rovio.</description>
+  <description brief="rovio_av">The rovio_av package contains nodes to control and query the audio/video devices on a WowWee Rovio. Video streaming is provided via the gscam package.</description>
   <author>Russell Toris</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
@@ -7,5 +7,6 @@
   <depend package="roscpp"/>
   <depend package="std_msgs"/>
   <depend package="rovio_shared"/>
+  <depend package="gscam"/>
 </package>
 
