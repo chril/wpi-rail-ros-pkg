@@ -1,0 +1,16 @@
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/ROSBUILD_genmsg_cpp.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/ROSBUILD_gensrv_cpp.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/ROSBUILD_gensrv_lisp.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/clean-test-results.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/rosbuild_precompile.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/rosbuild_premsgsrvgen.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/rospack_genmsg.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/rospack_genmsg_libexe.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/rospack_gensrv.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/test.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/test-future.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/test-results.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/test-results-run.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/tests.dir
+/home/rctoris/Documents/WPI/RAIL/ROS/apps/nao_trick_or_treat/build/CMakeFiles/trick_or_treater.dir
