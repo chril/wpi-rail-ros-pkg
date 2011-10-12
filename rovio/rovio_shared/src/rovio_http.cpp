@@ -34,7 +34,7 @@ size_t write_data(char *ptr, size_t size, size_t nmemb, rovio_response *buf)
     //update the size
     buf->size += new_data;
     // null terminate
-    buf->data[buf->size] = NULL;
+    buf->data[buf->size] = '\0';
   }
 
   return new_data;
