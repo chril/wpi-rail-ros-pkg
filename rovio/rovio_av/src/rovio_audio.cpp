@@ -1,26 +1,25 @@
-/*
+/*!
+ * \file rovio_audio.cpp
+ * \brief Communication node to the Rovio's audio devices.
+ *
  * The rovio_audio creates a ROS node that listens for the name of a .wav file as a string. The file is then streamed and played on the Rovio's speaker.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date October 11, 2011
+ * \date October 12, 2011
  */
 
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <ros/ros.h>
+#include <rovio_av/rovio_audio.h>
 #include <rovio_av/wav_play.h>
 #include <rovio_shared/rovio_http.h>
-#include <rovio_av/rovio_audio.h>
-#include <stdio.h>
 #include <string>
 #include <sstream>
 #include <sys/socket.h>
 
 using namespace std;
 
-/*!
- * Creates a audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
- */
 audio_controller::audio_controller() {
 	// check for all the correct parameters
 	if (!node.getParam(USER, user)) {
@@ -43,13 +42,6 @@ audio_controller::audio_controller() {
 	ROS_INFO("Rovio Audio Controller Initialized");
 }
 
-/*!
- * Process the service request and attempt to stream the given file to the Rovio. This call will block until the file has finished being sent.
- *
- * \param req the request for the wav_play server
- * \param argv the response for the wav_play server; this does not contain any information for this service
- * \return if the file was successfully streamed to the Rovio
- */
 bool audio_controller::wav_play_callback(rovio_av::wav_play::Request &req,
 		rovio_av::wav_play::Response &resp) {
 	// create a socket to talk to the Rovio
@@ -117,13 +109,6 @@ bool audio_controller::wav_play_callback(rovio_av::wav_play::Request &req,
 	return true;
 }
 
-/*!
- * Creates and runs the rovio_audio node.
- *
- * \param argc argument count that is passed to ros::init
- * \param argv arguments that are passed to ros::init
- * \return EXIT_SUCCESS if the node runs correctly
- */
 int main(int argc, char **argv) {
 	// initialize ROS and the node
 	ros::init(argc, argv, "rovio_audio");

@@ -1,34 +1,64 @@
-/*
+/*!
+ * \file rovio_audio.h
+ * \brief Communication node to the Rovio's audio devices.
+ *
  * The rovio_audio creates a ROS node that listens for the name of a .wav file as a string. The file is then streamed and played on the Rovio's speaker.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date October 11, 2011
+ * \date October 12, 2011
  */
 
 #ifndef ROVIO_AUDIO_H_
 #define ROVIO_AUDIO_H_
 
-using namespace std;
+#include <ros/ros.h>
+#include <rovio_av/wav_play.h>
+#include <string>
 
+/*!
+ * \class
+ * \brief Provides direct communication to the Rovio's audio devices.
+ *
+ * The audio_controller handles communication to the Rovio's audio devices. ROS nodes and services are created and maintained within this object.
+ */
 class audio_controller {
 public:
+	/*!
+	 * \brief Creates an audio_controller using ROS parameters.
+	 *
+	 * Creates a audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
+	 */
 	audio_controller();
 
 private:
-	// service callbacks
+	/*!
+	 * \brief wav_play service callback function.
+	 *
+	 * Process the service request and attempt to stream the given file to the Rovio. This call will block until the file has finished being sent.
+	 *
+	 * \param req the request for the wav_play server
+	 * \param argv the response for the wav_play server; this does not contain any information for this service
+	 * \return if the file was successfully streamed to the Rovio
+	 */
 	bool wav_play_callback(rovio_av::wav_play::Request &req,
 			rovio_av::wav_play::Response &resp);
 
-	// authentication information for the Rovio
-	string host;
-	string user;
-	string pass;
+	std::string host; /*!< host of the Rovio */
+	std::string user; /*!< username authentication information for the Rovio */
+	std::string pass; /*!< password authentication information for the Rovio */
 
-	// a handle for the node
-	ros::NodeHandle node;
+	ros::NodeHandle node; /*!< a handle for this ROS node */
 
-	// services
-	ros::ServiceServer wav_play;
+	ros::ServiceServer wav_play; /*!< the wav_play service */
 };
+
+/*!
+ * Creates and runs the rovio_audio node.
+ *
+ * \param argc argument count that is passed to ros::init
+ * \param argv arguments that are passed to ros::init
+ * \return EXIT_SUCCESS if the node runs correctly
+ */
+int main(int argc, char **argv);
 
 #endif
