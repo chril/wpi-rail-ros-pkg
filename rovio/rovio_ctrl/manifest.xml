@@ -1,5 +1,5 @@
 <package>
-  <description brief="rovio_ctrl">The rovio_ctrl package contains nodes to control and query the motor and head position from a WowWee Rovio.</description>
+  <description brief="Control and query the movement devices on a WowWee Rovio">The rovio_ctrl package contains nodes to control and query the motor and head position of a WowWee Rovio.</description>
   <author>Russell Toris</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>

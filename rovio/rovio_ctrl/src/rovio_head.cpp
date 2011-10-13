@@ -1,43 +1,22 @@
-/*
- * rovio_ctrl.cpp
+/*!
+ * \file rovio_head.h
+ * \brief Communication node to the Rovio's head motors.
  *
- *  Created on: Aug 2, 2011
- *      Author: rctoris
+ * The rovio_head creates a ROS node that allows service calls to change the head position and publishes head position data.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date October 12, 2011
  */
 
 #include <ros/ros.h>
 #include <rovio_ctrl/head_ctrl.h>
+#include <rovio_ctrl/rovio_head.h>
 #include <rovio_shared/rovio_http.h>
 #include <sstream>
 #include <std_msgs/String.h>
 #include <string>
 
 using namespace std;
-
-class head_controller
-{
-public:
-  head_controller();
-  ~head_controller();
-
-  // published topics
-  void pub_head_sensor();
-private:
-  // service callbacks
-  bool head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req, rovio_ctrl::head_ctrl::Response &resp);
-
-  // host location of the Rovio
-  string host;
-  // communicates with the Rovio
-  rovio_http *rovio;
-  // a handle for the node
-  ros::NodeHandle node;
-
-  // services
-  ros::ServiceServer head_ctrl;
-  //published topics
-  ros::Publisher head_sensor;
-};
 
 head_controller::head_controller()
 {
@@ -116,6 +95,7 @@ void head_controller::pub_head_sensor()
   // decide which head position the Rovio is in
   ss.str("");
   std_msgs::String msg;
+  //TODO: return response code as well
   if (resp_code > 140)
   {
     ss << "HEAD_DOWN";
@@ -153,4 +133,6 @@ int main(int argc, char **argv)
     controller.pub_head_sensor();
     loop_rate.sleep();
   }
+
+  return EXIT_SUCCESS;
 }

@@ -36,8 +36,8 @@ private:
 	 *
 	 * Process the service request and attempt to stream the given file to the Rovio. This call will block until the file has finished being sent.
 	 *
-	 * \param req the request for the wav_play server
-	 * \param argv the response for the wav_play server; this does not contain any information for this service
+	 * \param req the request for the wav_play service
+	 * \param argv the response for the wav_play service; this does not contain any information for this service
 	 * \return if the file was successfully streamed to the Rovio
 	 */
 	bool wav_play_callback(rovio_av::wav_play::Request &req,
