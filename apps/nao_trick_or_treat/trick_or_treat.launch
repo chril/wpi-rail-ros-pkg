@@ -1,7 +1,7 @@
 <launch>
 	<!-- Edit the parameters here for your Nao -->
 	<param name="/nao_trick_or_treat/host" type="string" value="130.215.29.12"/>
-	<param name="/nao_trick_or_treat/port" type="integer" value="9559"/>
+	<param name="/nao_trick_or_treat/port" value="9559"/>
 	<param name="/nao_trick_or_treat/naoqi" type="string" value="/opt/naoqi-sdk-1.10.52-linux/lib"/>
 	
 	<!-- Create an instance of each appropriate node -->

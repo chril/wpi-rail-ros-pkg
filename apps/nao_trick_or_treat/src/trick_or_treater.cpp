@@ -9,7 +9,11 @@
 #include <sensor_msgs/Joy.h>
 #include <math.h>
 #include <NaoCPP/naocpp_motion.h>
+#include <NaoCPP/naocpp_text_to_speech.h>
+#include <NaoCPP/naocpp_video.h>
 #include <nao_trick_or_treat/trick_or_treater.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <string>
 
 using namespace std;
@@ -40,6 +44,7 @@ trick_or_treater::trick_or_treater()
   //connect to the Nao
   motion = new naocpp_motion(host, port, naoqi);
   tts = new naocpp_text_to_speech(host, port, naoqi);
+  video = new naocpp_video(host, port, naoqi);
 
   // turn on the motors we need
   motion->set_stiffnesses("Body", 0.75);
@@ -62,6 +67,27 @@ trick_or_treater::trick_or_treater()
   //subscribe to the joystick
   joy_sub = node.subscribe<sensor_msgs::Joy> ("joy", 10, &trick_or_treater::joy_cback, this);
 
+  // setup the video stream
+  video->subscribe(VIDEO_SUB, kQVGA, kRGB, 30);
+  layers = 3;
+  // use the top camera
+  video->set_param(kCameraSelectID, 0);
+
+  // create an openCV window
+  cv::namedWindow(WINDOW_NAME, CV_WINDOW_AUTOSIZE);
+
+  int image_width = 320;
+  int image_height = 240;
+  // pad the image a bit
+  frame_padding_x = 10;
+  frame_padding_y = 50;
+
+  //setup the base image
+  img = new cv::Mat(frame_padding_y + 10 + image_height, frame_padding_x + image_width + 125, CV_MAKETYPE(8, layers));
+  cv::rectangle(*img, cv::Point(0, 0), cv::Point(img->cols, img->rows), cv::Scalar(127, 31, 31), -1, 8, 0);
+  cv::putText(*img, "Nao's Trick-or-Treat Interface", cv::Point(10, 30), cv::FONT_HERSHEY_SCRIPT_COMPLEX, 1.0,
+              cv::Scalar(0, 127, 255));
+
   ROS_INFO("Trick-or-Treater Initialized");
 }
 
@@ -72,6 +98,12 @@ trick_or_treater::~trick_or_treater()
   // reset all of the stiffnesses
   motion->set_stiffnesses("Body", 0);
   delete motion;
+  delete tts;
+
+  // close the video connection
+  video->unsubscribe(VIDEO_SUB);
+  delete video;
+  delete img;
 }
 
 void trick_or_treater::joy_cback(const sensor_msgs::Joy::ConstPtr& joy)
@@ -90,19 +122,10 @@ void trick_or_treater::joy_cback(const sensor_msgs::Joy::ConstPtr& joy)
     // set the walk speed
     float t = joy->axes.at(2) / (M_PI / 2.0);
     motion->set_walk_velocity(joy->axes.at(1), joy->axes.at(0), t, (abs(joy->axes.at(0)) + abs(joy->axes.at(1))) / 2.0);
-    // check the head angles
-    if (t != 0)
-    {
-      // get the head positions for the walk
-      head_yaw_pitch.push_back(joy->axes.at(2));
-      head_yaw_pitch.push_back(joy->axes.at(3));
-    }
-    else
-    {
-      // get the head positions from the D-pad
-      head_yaw_pitch.push_back(joy->axes.at(4));
-      head_yaw_pitch.push_back(joy->axes.at(5));
-    }
+
+    // get the head positions from the D-pad
+    head_yaw_pitch.push_back(joy->axes.at(4));
+    head_yaw_pitch.push_back(joy->axes.at(5));
 
     // check for any TTS buttons
     if (joy->buttons.at(0) == 1)
@@ -117,6 +140,35 @@ void trick_or_treater::joy_cback(const sensor_msgs::Joy::ConstPtr& joy)
   motion->set_angles(head, head_yaw_pitch, 0.4);
 }
 
+void trick_or_treater::update_gui()
+{
+  // get the top camera image
+  cv::Mat *cur_top = video->get_image(VIDEO_SUB);
+
+  // copy it onto to main image
+  for (int i = 0; i < cur_top->rows; i++)
+  {
+    int cur_top_offset = i * (cur_top->cols * layers);
+    int img_offset = (frame_padding_y + i) * (img->cols * layers);
+    for (int j = 0; j < cur_top->cols; j++)
+    {
+      int cur_top_index = cur_top_offset + (j * layers);
+      int img_index = img_offset + ((frame_padding_x + j) * layers);
+      // set RGB values
+      ((uchar *)(img->data))[img_index] = ((uchar *)(cur_top->data))[cur_top_index];
+      ((uchar *)(img->data))[img_index + 1] = ((uchar *)(cur_top->data))[cur_top_index + 1];
+      ((uchar *)(img->data))[img_index + 2] = ((uchar *)(cur_top->data))[cur_top_index + 2];
+    }
+  }
+
+  // update the image
+  cv::waitKey(1);
+  cv::imshow(WINDOW_NAME, *img);
+
+  // remove the cached image
+  delete cur_top;
+}
+
 int main(int argc, char **argv)
 {
   // initialize ROS and the node
@@ -125,13 +177,15 @@ int main(int argc, char **argv)
   // initialize the controller
   trick_or_treater tot;
 
-  // update at 5 Hz
-  ros::Rate loop_rate(5);
+  // update at 30 Hz
+  ros::Rate loop_rate(30);
   // continue until a ctrl-c has occurred
   while (ros::ok())
   {
-    ros::spinOnce();
+    // update the frames
+    tot.update_gui();
 
+    ros::spinOnce();
     loop_rate.sleep();
   }
 }
