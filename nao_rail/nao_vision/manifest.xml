@@ -1,9 +1,5 @@
 <package>
-  <description brief="nao_vision">
-
-     nao_vision
-
-  </description>
+  <description brief="Publish images from the Nao's camera">The nao_vision package contains a node to publish images from the Nao's on-board camera as a sensor_msgs/Image. Optional parameters can be set to set the resolution and select which camera to stream from.</description>
   <author>Russell Toris</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
@@ -11,7 +7,4 @@
   <depend package="rospy"/>
   <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
-
 </package>
-
-
