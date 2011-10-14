@@ -45,10 +45,15 @@ class NaoVision():
         except Exception:
             rospy.logerr("Unable to create vision proxy.")
             exit(1)
+            
+        # get any optional parameters
+        resolution = rospy.get_param("~resolution", 1)
+        cam = rospy.get_param("~camera", 0)
         
-        #TODO: create parameters
-        self.proxy_name = self.nao_cam.subscribe("nao_image", kQVGA, 11, 30)
+        #setup the camera stream
+        self.proxy_name = self.nao_cam.subscribe("nao_image", resolution, kRGBColorSpace, 30)
         self.nao_cam_pub = rospy.Publisher("nao_camera", Image)
+        self.nao_cam.setParam(kCameraSelectID, cam)
 
         rospy.loginfo("Nao Vision Node Initialized")
     
@@ -79,3 +84,4 @@ if __name__ == '__main__':
         vision.publish_image()
         rate.sleep()
     vision.disconnect()
+
