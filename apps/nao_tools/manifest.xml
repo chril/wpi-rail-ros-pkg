@@ -1,0 +1,17 @@
+<package>
+  <description brief="nao_tools">
+
+     nao_tools
+
+  </description>
+  <author>Russell Toris</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/nao_tools</url>
+  <depend package="roscpp"/>
+  <depend package="nao_ctrl"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
