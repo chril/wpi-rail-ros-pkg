@@ -12,8 +12,9 @@
 
 // printed at the start of each new line
 #define NAO_TERMINAL_PREFIX "> "
-// the command used to exit
+// the command used to exit or set the volume
 #define EXIT_COMMAND "exit()"
+#define VOLUME_COMMAND "volume(%f)"
 
 class nao_terminal_talk
 {
@@ -27,7 +28,7 @@ private:
   ros::NodeHandle node;
 
   // published topics
-  ros::Publisher speech;
+  ros::Publisher speech, volume;
 
   // used to check if the user used the 'exit' command
   bool exit_flag;

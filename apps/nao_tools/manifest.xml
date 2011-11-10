@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/nao_tools</url>
   <depend package="roscpp"/>
-  <depend package="nao_ctrl"/>
+  <depend package="nao_speech"/>
   <depend package="std_msgs"/>
 
 </package>

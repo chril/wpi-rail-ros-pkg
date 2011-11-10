@@ -7,16 +7,19 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
 #include <nao_tools/nao_terminal_talk.h>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 
 using namespace std;
 
 nao_terminal_talk::nao_terminal_talk()
 {
-  // create the published topic
-  speech = node.advertise<std_msgs::String> ("speech", 1);
+  // create the published topics
+  speech = node.advertise<std_msgs::String> ("nao_say", 1);
+  volume = node.advertise<std_msgs::Float32> ("nao_set_volume", 1);
   // set with the 'exit()' command
   exit_flag = false;
 
@@ -34,11 +37,20 @@ void nao_terminal_talk::process_command()
 
   // wait for the command
   string cmd;
+  float v;
   getline(cin, cmd);
 
   // check if it is the exit command
   if (cmd.compare(EXIT_COMMAND) == 0)
     exit_flag = true;
+  else if (sscanf(cmd.c_str(), VOLUME_COMMAND, &v) == 1)
+  {
+    // send the volume command
+    std_msgs::Float32 vol;
+    vol.data = v;
+
+    volume.publish(vol);
+  }
   else
   {
     // send the text to the nao_ctrl node

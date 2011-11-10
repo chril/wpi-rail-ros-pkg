@@ -4,7 +4,8 @@
 import roslib;
 roslib.load_manifest('nao_vision')
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import String 
+from std_msgs.msg import Float32
 import sys
 
  # the path parameter is optional
@@ -46,14 +47,18 @@ class NaoSpeech():
         lang = rospy.get_param("~language", "English")
         
         #setup the node and the TTS module
-        self.tts.setLanguage(lang)
-        self.tts.setVolume(volume)
-        rospy.Subscriber("nao_say", String, nao_say_callback)
+        self.tts.post.setLanguage(lang)
+        self.tts.post.setVolume(volume)
+        rospy.Subscriber("nao_say", String, self.nao_say_callback)
+        rospy.Subscriber("nao_set_volume", Float32, self.nao_set_volume_callback)
 
         rospy.loginfo("Nao Speech Node Initialized")
         
     def nao_say_callback(self, data):
         self.tts.post.say(data.data)
+        
+    def nao_set_volume_callback(self, data):
+        self.tts.post.setVolume(data.data)
 
 if __name__ == '__main__':
     NaoSpeech = NaoSpeech()
