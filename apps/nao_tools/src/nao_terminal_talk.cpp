@@ -16,14 +16,18 @@ using namespace std;
 nao_terminal_talk::nao_terminal_talk()
 {
   // create the published topic
-  man_drive = node.advertise<std_msgs::String> ("speech", 1);
-  // set with the 'exit' command
-  exit = false;
+  speech = node.advertise<std_msgs::String> ("speech", 1);
+  // set with the 'exit()' command
+  exit_flag = false;
 
-  ROS_INFO("Rovio Keyboard Teleop Started");
+  ROS_INFO("Nao Terminal Talk Started");
+
+  // print the exit information to the terminal
+  cout << "Enter text for the Nao to speak. "
+      << "To exit this node, use the 'exit()' command." << endl;
 }
 
-void process_command()
+void nao_terminal_talk::process_command()
 {
   // print out the start of the line
   cout << NAO_TERMINAL_PREFIX;
@@ -34,16 +38,20 @@ void process_command()
 
   // check if it is the exit command
   if (cmd.compare(EXIT_COMMAND) == 0)
-    exit = true;
+    exit_flag = true;
   else
   {
-    cout << cmd << endl;
+    // send the text to the nao_ctrl node
+    std_msgs::String msg;
+    msg.data = cmd;
+
+    speech.publish(msg);
   }
 }
 
 bool nao_terminal_talk::exit()
 {
-  return exit;
+  return exit_flag;
 }
 
 int main(int argc, char **argv)
@@ -58,10 +66,11 @@ int main(int argc, char **argv)
    * Continue until a ctrl-c has occurred.
    * Note that since process_command blocks, a ctrl-c will only be
    * processed after each command is handled. Alternatively, an
-   * 'exit' command can be used to quit.
+   * 'exit()' command can be used to quit.
    */
   while (ros::ok() && !talk.exit())
   {
+    talk.process_command();
     // for good practice
     ros::spinOnce();
   }

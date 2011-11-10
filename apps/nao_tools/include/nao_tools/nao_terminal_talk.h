@@ -30,7 +30,7 @@ private:
   ros::Publisher speech;
 
   // used to check if the user used the 'exit' command
-  bool exit;
+  bool exit_flag;
 };
 
 #endif

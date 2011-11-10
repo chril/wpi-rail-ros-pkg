@@ -1,0 +1,15 @@
+<launch>
+	<!-- Import your PYTHONPATH -->
+    <env name="PYTHONPATH" value="$(env PYTHONPATH)"/> 
+
+	<!-- Edit the parameters here for your Nao -->
+	<arg name="nao_ip" default="$(optenv NAO_IP 130.215.29.12)" />
+	<arg name="nao_port" default="$(optenv NAO_PORT 9559)" />
+  
+
+	<!-- Create an instance of each appropriate node -->
+	<node name="nao_terminal_talk" pkg="nao_tools" type="nao_terminal_talk" respawn="false" output="screen"/>
+	<!-- The speech topic lives in the nao_walker node -->
+	<node name="nao_walker" pkg="nao_ctrl" type="nao_walker.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" />
+
+</launch>
