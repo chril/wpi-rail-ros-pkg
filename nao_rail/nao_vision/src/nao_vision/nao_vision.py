@@ -7,14 +7,12 @@ import rospy
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 from std_msgs.msg import Time
+import sys
 
  # the path parameter is optional
-try:
-    path = rospy.get_param("/naoqi/path")
-    import sys
-    sys.path.append(path)
-except KeyError:
-    rospy.loginfo("No addition PYTHONPATH set")
+path = rospy.get_param("/naoqi/path", "")
+sys.path.append(path)
+
 # attempt to load NAOqi
 try:
     from naoqi import ALProxy

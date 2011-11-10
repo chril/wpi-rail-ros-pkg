@@ -1,6 +1,6 @@
 <launch>
 	<!-- Import your PYTHONPATH -->
-    <env name="PYTHONPATH" value="$(env PYTHONPATH)"/> 
+	<env name="PYTHONPATH" value="$(env PYTHONPATH)"/> 
 
 	<!-- Edit the parameters here for your Nao -->
 	<param name="/naoqi/host" type="string" value="130.215.29.12"/>
