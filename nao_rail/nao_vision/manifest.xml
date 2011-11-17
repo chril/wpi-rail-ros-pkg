@@ -1,5 +1,5 @@
 <package>
-  <description brief="Publish images from the Nao's camera">The nao_vision package contains a node to publish images from the Nao's on-board camera as a sensor_msgs/Image. Optional parameters can be set to set the resolution and select which camera to stream from.</description>
+  <description brief="Publish images from the Nao's camera">The nao_vision package contains a node to publish images from the Nao's on-board camera as a sensor_msgs/Image. Optional parameters can be set to set the resolution and select which camera to stream from. This package has been tested with NAOqi version 1.10.52.</description>
   <author>Russell Toris</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
