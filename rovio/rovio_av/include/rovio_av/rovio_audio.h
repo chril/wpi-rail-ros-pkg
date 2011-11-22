@@ -21,35 +21,36 @@
  *
  * The audio_controller handles communication to the Rovio's audio devices. ROS nodes and services are created and maintained within this object.
  */
-class audio_controller {
+class audio_controller
+{
 public:
-	/*!
-	 * \brief Creates an audio_controller using ROS parameters.
-	 *
-	 * Creates a audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
-	 */
-	audio_controller();
+  /*!
+   * \brief Creates an audio_controller using ROS parameters.
+   *
+   * Creates a audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
+   */
+  audio_controller();
 
 private:
-	/*!
-	 * \brief wav_play service callback function.
-	 *
-	 * Process the service request and attempt to stream the given file to the Rovio. This call will block until the file has finished being sent.
-	 *
-	 * \param req the request for the wav_play service
-	 * \param argv the response for the wav_play service; this does not contain any information for this service
-	 * \return if the file was successfully streamed to the Rovio
-	 */
-	bool wav_play_callback(rovio_shared::wav_play::Request &req,
-	                       rovio_shared::wav_play::Response &resp);
+  /*!
+   * \brief wav_play service callback function.
+   *
+   * Process the service request and attempt to stream the given file to the Rovio. This call will block until the file has finished being sent.
+   *
+   * \param req the request for the wav_play service
+   * \param argv the response for the wav_play service; this does not contain any information for this service
+   * \return if the file was successfully streamed to the Rovio
+   */
+  bool wav_play_callback(rovio_shared::wav_play::Request &req,
+                         rovio_shared::wav_play::Response &resp);
 
-	std::string host; /*!< host of the Rovio */
-	std::string user; /*!< username authentication information for the Rovio */
-	std::string pass; /*!< password authentication information for the Rovio */
+  std::string host; /*!< host of the Rovio */
+  std::string user; /*!< username authentication information for the Rovio */
+  std::string pass; /*!< password authentication information for the Rovio */
 
-	ros::NodeHandle node; /*!< a handle for this ROS node */
+  ros::NodeHandle node; /*!< a handle for this ROS node */
 
-	ros::ServiceServer wav_play; /*!< the wav_play service */
+  ros::ServiceServer wav_play; /*!< the wav_play service */
 };
 
 /*!
