@@ -1,0 +1,5 @@
+<launch>
+	<!-- Create an instance of each appropriate node -->
+  	<node name="cba" pkg="cba" type="cba" respawn="false" output="screen"/>
+</launch>
+

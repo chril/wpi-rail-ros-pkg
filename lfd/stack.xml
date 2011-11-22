@@ -1,5 +1,5 @@
 <stack>
-  <description brief="lfd">lfd</description>
+  <description brief="Learning from Demonstration algorithms.">Learning from Demonstration algorithms developed by the RAIL research group at WPI.</description>
   <author>Maintained by Russell Toris</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
