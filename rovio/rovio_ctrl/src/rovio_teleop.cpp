@@ -1,223 +1,68 @@
-/*
- * rovio_ctrl.cpp
+/*!
+ * \file rovio_teleop.h
+ * \brief Allows for control of the Rovio with a joystick.
  *
- *  Created on: Aug 2, 2011
- *      Author: rctoris
+ * rovio_teleop creates a ROS node that allows the control of a Rovio with a joystick.
+ * This node listens to a joy topic and sends messages to the cmd_vel topic in the rovio_move node and head_ctrl service in the rovio_head node.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date November 22, 2011
  */
 
+#include <geometry_msgs/Twist.h>
 #include <ros/ros.h>
-#include <rovio_ctrl/head_ctrl.h>
+#include <rovio_shared/head_ctrl.h>
+#include <rovio_ctrl/rovio_teleop.h>
 #include <rovio_shared/man_drv.h>
-#include <signal.h>
-#include <stdio.h>
+#include <sensor_msgs/Joy.h>
 #include <string>
-#include <termios.h>
 
 using namespace std;
-
-// keycodes for the controller
-#define KEY_W 0x77
-#define KEY_A 0x61
-#define KEY_S 0x73
-#define KEY_D 0x64
-#define KEY_Q 0x71
-#define KEY_E 0x65
-#define KEY_1 0x31
-#define KEY_2 0x32
-#define KEY_3 0x33
-#define KEY_4 0x34
-#define KEY_5 0x35
-#define KEY_6 0x36
-#define KEY_7 0x37
-#define KEY_8 0x38
-#define KEY_9 0x39
-#define KEY_0 0x30
-#define KEY_LT 0x2C
-#define KEY_GT 0x2E
-#define KEY_FSLASH 0x2F
-
-// terminal modes for reading input
-struct termios buffered, raw;
-
-void set_terminal_buffered()
-{
-  tcsetattr(0, TCSANOW, &buffered);
-}
-
-class teleop_controller
-{
-public:
-  teleop_controller();
-  void run();
-
-private:
-  // a handle for the node
-  ros::NodeHandle node;
-
-  // published topics and clients
-  ros::Publisher man_drive;
-  ros::ServiceClient head_ctrl;
-
-  int speed;
-};
 
 teleop_controller::teleop_controller()
 {
   // create the published topic and client
-  man_drive = node.advertise<rovio_shared::man_drv> ("man_drv", 8);
-  head_ctrl = node.serviceClient<rovio_ctrl::head_ctrl> ("head_ctrl");
+  cmd_vel = node.advertise<geometry_msgs::Twist> ("cmd_vel", 10);
+  head_ctrl = node.serviceClient<rovio_shared::head_ctrl> ("head_ctrl");
 
-  // start off with a speed of 5
-  speed = 5;
-
-  // put the terminal in raw mode
-  tcgetattr(0, &buffered);
-  memcpy(&raw, &buffered, sizeof(struct termios));
-  raw.c_lflag &= ~(ICANON | ECHO);
-  raw.c_cc[VEOL] = 1;
-  raw.c_cc[VEOF] = 2;
-  tcsetattr(0, TCSANOW, &raw);
-
-  ROS_INFO("Rovio Keyboard Teleop Started");
+  //subscribe to the joystick
+  joy_sub = node.subscribe<sensor_msgs::Joy> ("joy", 10, &teleop_controller::joy_cback, this);
+  ROS_INFO("Rovio Teleop Started");
 }
 
-void teleop_controller::run()
+void teleop_controller::joy_cback(const sensor_msgs::Joy::ConstPtr& joy)
 {
-  // keystroke to be read
-  char c;
+  // create the message for a speed message and request for the head
+  rovio_shared::man_drv drv;
+  rovio_shared::head_ctrl head;
 
-  // continue until we have an input error
-  while (read(0, &c, 1))
-  {
-    // create the message for a speed message and request for the head
-    rovio_shared::man_drv msg;
-    rovio_ctrl::head_ctrl srv;
+  // check for any head control buttons
+  if (joy->buttons.at(0) == 1)
+    head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_DOWN;
+  else if (joy->buttons.at(1) == 1)
+    head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_MIDDLE;
+  else if (joy->buttons.at(2) == 1)
+    head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_UP;
+  else
+    head.request.head_pos = -1;
 
-    // parse the message
-    switch (c)
-    {
-      case KEY_W:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::FORWARD;
-        break;
-      case KEY_A:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::STRAIGHT_LEFT;
-        break;
-      case KEY_S:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::BACKWARD;
-        break;
-      case KEY_D:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::STRAIGHT_RIGHT;
-        break;
-      case KEY_Q:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::ROTATE_LEFT;
-        break;
-      case KEY_E:
-        srv.request.head_pos = -1;
-        msg.drive = rovio_shared::man_drv::ROTATE_RIGHT;
-        break;
-      case KEY_1:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        msg.speed = 1;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_2:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 2;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_3:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 3;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_4:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 4;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_5:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 5;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_6:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 6;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_7:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 7;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_8:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 8;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_9:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 9;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_0:
-        srv.request.head_pos = -1;
-        msg.drive = -1;
-        speed = 10;
-        ROS_INFO("Speed set to %i", speed);
-        break;
-      case KEY_LT:
-        msg.drive = -1;
-        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_DOWN;
-        break;
-      case KEY_GT:
-        msg.drive = -1;
-        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_MIDDLE;
-        break;
-      case KEY_FSLASH:
-        msg.drive = -1;
-        srv.request.head_pos = rovio_ctrl::head_ctrl::Request::HEAD_UP;
-        break;
-      default:
-        // not a valid key
-        msg.drive = -1;
-        srv.request.head_pos = -1;
-        break;
-    }
-    //set the speed
-    msg.speed = speed;
+  // check if a head request was made
+  if (head.request.head_pos != -1)
+    // send the request
+    head_ctrl.call(head);
 
-    // check if a valid key was pressed
-    if (msg.drive != -1)
-      // publish the message
-      man_drive.publish(msg);
-    else if (srv.request.head_pos != -1)
-      // send the request
-      head_ctrl.call(srv);
-  }
-}
-
-void end(int signal)
-{
-  // reset the terminal mode back
-  tcsetattr(0, TCSANOW, &buffered);
-  // shutdown ROS and exit once finished
-  ros::shutdown();
-  exit(0);
+  // create the twist message
+  geometry_msgs::Twist twist;
+  // left joystick controls the linear movement
+  twist.linear.x = joy->axes.at(1);
+  twist.linear.y = -joy->axes.at(0);
+  twist.linear.z = 0;
+  // right joystick controls the angular movement
+  twist.angular.x = 0;
+  twist.angular.y = 0;
+  twist.angular.z = -joy->axes.at(2);
+  // send the twist command
+  cmd_vel.publish(twist);
 }
 
 int main(int argc, char **argv)
@@ -228,9 +73,6 @@ int main(int argc, char **argv)
   // initialize the Rovio controller
   teleop_controller controller;
 
-  // handle a ctrl-c
-  signal(SIGINT, end);
-
-  // run the controller
-  controller.run();
+  // continue until a ctrl-c has occurred
+  ros::spin();
 }

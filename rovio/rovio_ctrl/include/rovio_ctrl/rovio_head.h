@@ -2,22 +2,22 @@
  * \file rovio_head.h
  * \brief Communication node to the Rovio's head motors.
  *
- * The rovio_head creates a ROS node that allows service calls to change the head position and publishes head position data.
+ * rovio_head creates a ROS node that allows service calls to change the head position and publishes head position data.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date October 12, 2011
+ * \date November 22, 2011
  */
 
 #ifndef ROVIO_HEAD_H_
 #define ROVIO_HEAD_H_
 
 #include <ros/ros.h>
-#include <rovio_ctrl/head_ctrl.h>
+#include <rovio_shared/head_ctrl.h>
 #include <rovio_shared/rovio_http.h>
 #include <string>
 
 /*!
- * \class
+ * \class head_controller
  * \brief Provides direct communication to the Rovio to control the head.
  *
  * The head_controller handles communication to the Rovio's head motor devices. ROS nodes, services, and publishers are created and maintained within this object.
@@ -25,7 +25,7 @@
 class head_controller {
 public:
 	/*!
-	 * \brief Creates an head_controller using ROS parameters.
+	 * \brief Creates a head_controller using ROS parameters.
 	 *
 	 * Creates a head_controller object that can be used control and query the Rovio's head motors. A valid username, password, and host must be set as ROS parameters.
 	 */
@@ -54,8 +54,8 @@ private:
 	 * \param argv the response for the head_ctrl service to be filled
 	 * \return if the request was successfully sent to the Rovio
 	 */
-	bool head_ctrl_callback(rovio_ctrl::head_ctrl::Request &req,
-			rovio_ctrl::head_ctrl::Response &resp);
+	bool head_ctrl_callback(rovio_shared::head_ctrl::Request &req,
+	                        rovio_shared::head_ctrl::Response &resp);
 
 	std::string host; /*!< host of the Rovio */
 	rovio_http *rovio; /*!< communicates with the Rovio */

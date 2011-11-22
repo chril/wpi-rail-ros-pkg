@@ -7,6 +7,9 @@
   <depend package="std_msgs"/>
   <depend package="roscpp"/>
   <depend package="rovio_shared"/>
+  <depend package="geometry_msgs"/>
+  <depend package="joy"/>
+  <depend package="sensor_msgs"/>
 </package>
 
 

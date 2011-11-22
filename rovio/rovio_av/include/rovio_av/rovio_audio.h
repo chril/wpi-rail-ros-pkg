@@ -2,21 +2,21 @@
  * \file rovio_audio.h
  * \brief Communication node to the Rovio's audio devices.
  *
- * The rovio_audio creates a ROS node that listens for the name of a .wav file as a string. The file is then streamed and played on the Rovio's speaker.
+ * rovio_audio creates a ROS node that listens for the name of a .wav file as a string. The file is then streamed and played on the Rovio's speaker.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date October 12, 2011
+ * \date November 22, 2011
  */
 
 #ifndef ROVIO_AUDIO_H_
 #define ROVIO_AUDIO_H_
 
 #include <ros/ros.h>
-#include <rovio_av/wav_play.h>
+#include <rovio_shared/wav_play.h>
 #include <string>
 
 /*!
- * \class
+ * \class audio_controller
  * \brief Provides direct communication to the Rovio's audio devices.
  *
  * The audio_controller handles communication to the Rovio's audio devices. ROS nodes and services are created and maintained within this object.
@@ -40,8 +40,8 @@ private:
 	 * \param argv the response for the wav_play service; this does not contain any information for this service
 	 * \return if the file was successfully streamed to the Rovio
 	 */
-	bool wav_play_callback(rovio_av::wav_play::Request &req,
-			rovio_av::wav_play::Response &resp);
+	bool wav_play_callback(rovio_shared::wav_play::Request &req,
+	                       rovio_shared::wav_play::Response &resp);
 
 	std::string host; /*!< host of the Rovio */
 	std::string user; /*!< username authentication information for the Rovio */
