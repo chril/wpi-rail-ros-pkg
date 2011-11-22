@@ -3,7 +3,7 @@
  * \brief Allows for control of the Rovio with a joystick.
  *
  * rovio_teleop creates a ROS node that allows the control of a Rovio with a joystick.
- * This node listens to a joy topic and sends messages to the cmd_vel topic in the rovio_move node and head_ctrl service in the rovio_head node.
+ * This node listens to a joy topic and sends messages to the cmd_vel topic in the rovio_move node, head_ctrl service in the rovio_head node, and wav_play service in the rovio_audio node.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
  * \date November 22, 2011
@@ -13,7 +13,14 @@
 #define ROVIO_TELEOP_H_
 
 #include <ros/ros.h>
+#include <rovio_shared/wav_play.h>
 #include <sensor_msgs/Joy.h>
+
+/*!
+ * \def ROVIO_WAV
+ * The rovio_av wav directory location ROS parameter name
+ */
+#define ROVIO_WAV "/rovio_shared/rovio_wav"
 
 /*!
  * \class teleop_controller
@@ -44,8 +51,10 @@ private:
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
   ros::Publisher cmd_vel; /*!< the cmd_vel topic */
-  ros::ServiceClient head_ctrl; /*!< the head_ctrl service */
+  ros::ServiceClient head_ctrl, wav_play; /*!< the head_ctrl and wav_play services */
   ros::Subscriber joy_sub; /*!< the joy topic */
+
+  std::string rovio_wav; /*!< the rovio_av wav directory location */
 };
 
 /*!

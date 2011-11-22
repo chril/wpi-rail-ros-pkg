@@ -14,6 +14,7 @@
 #include <rovio_shared/head_ctrl.h>
 #include <rovio_ctrl/rovio_teleop.h>
 #include <rovio_shared/man_drv.h>
+#include <rovio_shared/wav_play.h>
 #include <sensor_msgs/Joy.h>
 #include <string>
 
@@ -21,12 +22,21 @@ using namespace std;
 
 teleop_controller::teleop_controller()
 {
+  // check for all the correct parameters
+  if (!node.getParam(ROVIO_WAV, rovio_wav))
+  {
+    ROS_ERROR("Parameter %s not found.", ROVIO_WAV);
+    exit(-1);
+  }
+
   // create the published topic and client
   cmd_vel = node.advertise<geometry_msgs::Twist> ("cmd_vel", 10);
   head_ctrl = node.serviceClient<rovio_shared::head_ctrl> ("head_ctrl");
+  wav_play = node.serviceClient<rovio_shared::wav_play> ("wav_play");
 
   //subscribe to the joystick
   joy_sub = node.subscribe<sensor_msgs::Joy> ("joy", 10, &teleop_controller::joy_cback, this);
+
   ROS_INFO("Rovio Teleop Started");
 }
 
@@ -35,21 +45,40 @@ void teleop_controller::joy_cback(const sensor_msgs::Joy::ConstPtr& joy)
   // create the message for a speed message and request for the head
   rovio_shared::man_drv drv;
   rovio_shared::head_ctrl head;
+  rovio_shared::wav_play wav;
 
   // check for any head control buttons
+  head.request.head_pos = -1;
   if (joy->buttons.at(0) == 1)
     head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_DOWN;
   else if (joy->buttons.at(1) == 1)
     head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_MIDDLE;
   else if (joy->buttons.at(2) == 1)
     head.request.head_pos = rovio_shared::head_ctrl::Request::HEAD_UP;
-  else
-    head.request.head_pos = -1;
 
   // check if a head request was made
   if (head.request.head_pos != -1)
     // send the request
     head_ctrl.call(head);
+
+  // check for any audio buttons
+  wav.request.f = "";
+  wav.request.f.append(rovio_wav);
+  if (joy->buttons.at(4) == 1)
+    wav.request.f.append("/G11.wav");
+  else if (joy->buttons.at(5) == 1)
+    wav.request.f.append("/G03.wav");
+  else if (joy->buttons.at(6) == 1)
+    wav.request.f.append("/G27a.wav");
+  else if (joy->buttons.at(7) == 1)
+    wav.request.f.append("/G34.wav");
+  else
+    wav.request.f = "";
+
+  // check if a audio request was made
+  if (wav.request.f.size() > 0)
+    // send the request
+    wav_play.call(wav);
 
   // create the twist message
   geometry_msgs::Twist twist;

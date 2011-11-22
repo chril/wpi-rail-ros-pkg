@@ -1,4 +1,4 @@
-# Fully qualified name of the .wav file to play
+# Absolute file name of the .wav file to play
 string f
 ---
 # No response
