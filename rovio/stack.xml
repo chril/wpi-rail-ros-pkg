@@ -1,5 +1,5 @@
 <stack>
-  <description brief="rovio">The rovio stack contains packages to control and query a WowWee Rovio.</description>
+  <description brief="Control and query a WowWee Rovio.">The rovio stack contains packages to control and query a WowWee Rovio.</description>
   <author>Maintained by Russell Toris</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
