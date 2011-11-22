@@ -1,0 +1,9 @@
+<stack>
+  <description brief="lfd">lfd</description>
+  <author>Maintained by Russell Toris</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lfd</url>
+  <depend stack="ros" />
+
+</stack>
