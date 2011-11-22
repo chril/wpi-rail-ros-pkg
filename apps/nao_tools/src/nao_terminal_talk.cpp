@@ -1,17 +1,20 @@
-/*
- * nao_terminal_talk.cpp
+/*!
+ * \file nao_terminal_talk.cpp
+ * \brief Control of the text-to-speech module over the terminal
  *
- *  Created on: Nov 10, 2011
- *      Author: rctoris
+ * nao_terminal_talk allows you to type text into the terminal and send it to the Nao's text-to-speech module. Volume control is also enabled in this node with use of the volume() command.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date November 22, 2011
  */
 
+#include <iostream>
+#include <nao_tools/nao_terminal_talk.h>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Float32.h>
-#include <nao_tools/nao_terminal_talk.h>
-#include <string>
-#include <iostream>
 #include <stdio.h>
+#include <string>
 
 using namespace std;
 
@@ -63,6 +66,7 @@ void nao_terminal_talk::process_command()
 
 bool nao_terminal_talk::exit()
 {
+  // just return the flag
   return exit_flag;
 }
 
