@@ -62,7 +62,7 @@ private:
    * \brief cmd_vel topic callback function.
    *
    * Process the twist message and set the appropriate fields. This function is adapted from http://www.ros.org/wiki/rovio_controller.
-   * A positive angular-z value corresponds to a clockwise. Movement along linear-y corresponds to moving left/right and movement along linear-y corresponds to moving forwards/backwards.
+   * A positive angular-z value corresponds to a clockwise rotation. Movement along linear-y corresponds to moving left/right and movement along linear-x corresponds to moving forwards/backwards.
    *
    * \param msg the message for the man_drv topic
    */
