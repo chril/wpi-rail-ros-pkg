@@ -1,6 +1,6 @@
 <package>
   <description brief="Control and query the speech module on an Aldebaran Nao.">
-    The nao_speech package contains nodes to control and query the speech module on an Aldebaran Nao. Language and volume settings can be checked and modified using this package. This package has been tested with NAOqi version 1.10.52.
+    The nao_speech package contains nodes to control the speech module on an Aldebaran NAO. Language and volume settings can be modified using this package. This package has been tested with NAOqi version 1.10.52.
   </description>
   <author>Russell Toris</author>
   <license>BSD</license>
