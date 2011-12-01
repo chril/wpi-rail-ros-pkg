@@ -1,11 +1,12 @@
 /*!
  * \file nao_terminal_talk.cpp
- * \brief Control of the text-to-speech module over the terminal
+ * \brief Control of the NAO's text-to-speech module over the terminal
  *
- * nao_terminal_talk allows you to type text into the terminal and send it to the Nao's text-to-speech module. Volume control is also enabled in this node with use of the volume() command.
+ * nao_terminal_talk allows you to type text into the terminal and send it to the NAO's text-to-speech module.
+ * Volume and language control is also enabled in this node with use of the volume() and lang() commands.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date November 22, 2011
+ * \date December 1, 2011
  */
 
 #include <iostream>
@@ -23,6 +24,7 @@ nao_terminal_talk::nao_terminal_talk()
   // create the published topics
   speech = node.advertise<std_msgs::String> ("nao_say", 1);
   volume = node.advertise<std_msgs::Float32> ("nao_set_volume", 1);
+  lang = node.advertise<std_msgs::String> ("nao_set_lang", 1);
   // set with the 'exit()' command
   exit_flag = false;
 
@@ -42,6 +44,8 @@ void nao_terminal_talk::process_command()
   string cmd;
   float v;
   getline(cin, cmd);
+  // language buffer
+  char l[cmd.size()];
 
   // check if it is the exit command
   if (cmd.compare(EXIT_COMMAND) == 0)
@@ -53,6 +57,19 @@ void nao_terminal_talk::process_command()
     vol.data = v;
 
     volume.publish(vol);
+  }
+  else if (sscanf(cmd.c_str(), LANG_COMMAND, l) == 1)
+  {
+    //remove the trailing ')'
+    l[strlen(l)-1] = '\0';
+
+    // send the language command
+    std_msgs::String language;
+    string tmp(l);
+    language.data = tmp;
+    ROS_INFO("%s", tmp.c_str());
+    ROS_INFO("%s", l);
+    lang.publish(language);
   }
   else
   {
@@ -74,6 +91,9 @@ int main(int argc, char **argv)
 {
   // initialize ROS and the node
   ros::init(argc, argv, "nao_terminal_talk");
+
+  // let any other nodes get up and running
+  sleep(2);
 
   // initialize the controller
   nao_terminal_talk talk;

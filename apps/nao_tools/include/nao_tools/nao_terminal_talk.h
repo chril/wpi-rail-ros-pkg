@@ -1,11 +1,12 @@
 /*!
  * \file nao_terminal_talk.h
- * \brief Control of the text-to-speech module over the terminal
+ * \brief Control of the NAO's text-to-speech module over the terminal
  *
- * nao_terminal_talk allows you to type text into the terminal and send it to the Nao's text-to-speech module. Volume control is also enabled in this node with use of the volume() command.
+ * nao_terminal_talk allows you to type text into the terminal and send it to the NAO's text-to-speech module.
+ * Volume and language control is also enabled in this node with use of the volume() and lang() commands.
  *
  * \author Russell Toris, WPI - rctoris@wpi.edu
- * \date November 22, 2011
+ * \date December 1, 2011
  */
 
 #ifndef NAO_TERMINAL_TALK_H_
@@ -34,8 +35,14 @@
 #define VOLUME_COMMAND "volume(%f)"
 
 /*!
+ * \def LANG_COMMAND
+ * The command used to set the language
+ */
+#define LANG_COMMAND "lang(%s)"
+
+/*!
  * \class nao_terminal_talk
- * \brief A terminal-based node that allows for control of the Nao's text-to-speech module.
+ * \brief A terminal-based node that allows for control of the NAO's text-to-speech module.
  *
  * The nao_terminal_talk handles communication to the Nao's text-to-speech module. ROS nodes and topics are created and maintained within this object.
  */
@@ -45,15 +52,18 @@ public:
   /*!
    * \brief Creates a nao_terminal_talk.
    *
-   * Creates a nao_terminal_talk object that can be used control of the Nao's text-to-speech module.
+   * Creates a nao_terminal_talk object that can be used control of the NAO's text-to-speech module.
    */
   nao_terminal_talk();
 
   /*!
    * \brief Process a line of input from standard-in.
    *
-   * Based on current line of input from standard-in, the command will be sent to the Nao's text-to-speech module.
-   * If an exit() command is seen, the node is shut down. If the volume() command is seen, the volume is changed. All other input is sent directly to the module.
+   * Based on current line of input from standard-in, the command will be sent to the NAO's text-to-speech module.
+   * If an exit() command is seen, the node is shut down.
+   * If the volume() command is seen, the volume is changed.
+   * If the lang() command is seen, the langauge is changed.
+   * All other input is sent directly to the module.
    */
   void process_command();
 
@@ -67,7 +77,7 @@ public:
 
 private:
   ros::NodeHandle node; /*!< a handle for this ROS node */
-  ros::Publisher speech, volume; /*!< the nao_say and nao_set_volume topics */
+  ros::Publisher speech, volume, lang; /*!< the nao_say, nao_set_lang, and nao_set_volume topics */
 
   bool exit_flag; /*!< used to check if the user used the 'exit' command */
 };
