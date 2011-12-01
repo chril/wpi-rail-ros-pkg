@@ -17,15 +17,14 @@ int main(int argc, char **argv)
   sleep(1);
 
   // publish a few states
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 10; i++)
   {
     lfd_common::state s;
-    for (int j = 0; j < 10; j++)
-      s .state_vector.push_back(j * i);
+    for (int j = 0; j < 5; j++)
+      s .state_vector.push_back(i);
     update_state.publish(s);
+    sleep(1);
   }
-
-  sleep(1);
 
   return EXIT_SUCCESS;
 }
