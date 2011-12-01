@@ -53,7 +53,7 @@ class NaoSpeech():
         rospy.Subscriber("nao_set_volume", Float32, self.nao_set_volume_callback)
         rospy.Subscriber("nao_set_lang", String, self.nao_set_lang_callback)
 
-        rospy.loginfo("Nao Speech Node Initialized")
+        rospy.loginfo("NAO Speech Node Initialized")
         
     def nao_say_callback(self, data):
         self.tts.post.say(data.data)

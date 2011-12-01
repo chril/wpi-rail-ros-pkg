@@ -53,7 +53,7 @@ class NaoVision():
         self.nao_cam_pub = rospy.Publisher("nao_camera", Image)
         self.nao_cam.setParam(kCameraSelectID, cam)
 
-        rospy.loginfo("Nao Vision Node Initialized")
+        rospy.loginfo("NAO Vision Node Initialized")
     
     def publish_image(self):
         # get the image from the Nao

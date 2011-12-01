@@ -28,10 +28,10 @@ nao_terminal_talk::nao_terminal_talk()
   // set with the 'exit()' command
   exit_flag = false;
 
-  ROS_INFO("Nao Terminal Talk Started");
+  ROS_INFO("NAO Terminal Talk Started");
 
   // print the exit information to the terminal
-  cout << "Enter text for the Nao to speak. "
+  cout << "Enter text for the NAO to speak. "
       << "To exit this node, use the 'exit()' command." << endl;
 }
 
