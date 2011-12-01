@@ -9,7 +9,7 @@
 	<param name="/naoqi/path" type="string" value="/opt/naoqi-sdk-1.10.52-linux/lib"/>
 
 	<!-- Optional Parameters for Voice -->
-	<param name="/nao_speech/volume" value="0.65"/>
+	<param name="/nao_speech/volume" value="0.5"/>
 	<param name="/nao_speech/language" type="string" value="English"/>
 
 	<!-- Create an instance of each appropriate node -->
