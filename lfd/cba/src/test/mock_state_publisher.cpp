@@ -6,8 +6,8 @@
  */
 
 #include <lfd_common/state.h>
-#include <lfd_common/conf_classification.h>
 #include <ros/ros.h>
+#include <time.h>
 
 using namespace std;
 
@@ -19,16 +19,20 @@ int main(int argc, char **argv)
   ros::NodeHandle node;
 
   // published topics
-  ros::Publisher update_state = node.advertise<lfd_common::state> ("update_state", 1);
+  ros::Publisher update_state = node.advertise<lfd_common::state> ("state_listener", 1);
+
+  // used to create random states
+  srand(time(NULL));
 
   ROS_INFO("Mock State Publisher Initialized");
 
   // publish states continuously
   while (ros::ok())
   {
+    // 3 dimensional state vector all in range [0,25)
     lfd_common::state s;
-    for (int j = 0; j < 5; j++)
-      s .state_vector.push_back(j * j);
+    for (int i = 0; i < 3; i++)
+      s .state_vector.push_back(rand() % 25);
     update_state.publish(s);
     ros::spinOnce();
   }

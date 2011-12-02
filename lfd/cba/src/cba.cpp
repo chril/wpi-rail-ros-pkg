@@ -26,7 +26,7 @@ cba_learner::cba_learner()
   // add subscriptions and services
   execute = node.advertise<std_msgs::Int32> ("execute", 1);
   add_point = node.advertise<lfd_common::classification_point> ("add_point", -1);
-  state_listener = node.subscribe<lfd_common::state> ("update_state", 1, &cba_learner::state_listener_callback, this);
+  state_listener = node.subscribe<lfd_common::state> ("state_listener", 1, &cba_learner::state_listener_callback, this);
   a_complete = node.subscribe<std_msgs::Bool> ("a_complete", 1, &cba_learner::a_complete_callback, this);
   classify = node.serviceClient<lfd_common::conf_classification> ("classify");
   demonstration = node.serviceClient<lfd_common::demonstration> ("demonstration");
@@ -169,6 +169,8 @@ prediction *cba_learner::classify_state()
     p->c = cc.response.c;
     p->l = cc.response.l;
     p->db = cc.response.db;
+
+    cout << p->c << " " << p->l << " " << p->db << endl;
   }
   else
   {
