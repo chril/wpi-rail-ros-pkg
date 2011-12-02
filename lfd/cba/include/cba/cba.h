@@ -25,6 +25,16 @@
  */
 #define DEFAULT_MAX_POINTS 1024
 /*!
+ * \def DIST_THRESH_MULT
+ * The distance threshold multiplier
+ */
+#define DIST_THRESH_MULT "~dist_thresh_mult"
+/*!
+ * \def DEFAULT_DIST_MULT
+ * The default distance threshold multiplier
+ */
+#define DEFAULT_DIST_MULT 1.5
+/*!
  * \def ANN_EPSILON
  * The error bound on ANN
  */
@@ -43,12 +53,13 @@ typedef struct
 
 /*!
  * \struct conf
- * A confidence threshold value for a given action label and decision boundary pair.
+ * A confidence threshold value for a given action label and decision boundary pair as well as a counter indicating the number of miss-classified points used in the computation of this threshold.
  */
 typedef struct
 {
   int l;
   int db;
+  int cnt;
   double thresh;
 } conf;
 
@@ -63,21 +74,24 @@ private:
   prediction *classify_state();
   double nearest_neighbor();
   double conf_thresh(int l, int db);
+  void update_thresholds();
   void state_listener_callback(const lfd_common::state::ConstPtr &msg);
   void a_complete_callback(const std_msgs::Bool::ConstPtr &msg);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
+  ros::Publisher execute, add_point; /*!< the execute and add_point topics */
   ros::Subscriber state_listener, a_complete; /*!< the state_listener and a_complete topics */
-  ros::ServiceClient classify; /*!< the classify service */
+  ros::ServiceClient classify, demonstration; /*!< the classify and demonstration services */
 
-  float *s; /*!< the current state of CBA */
-  int s_size, max_pts, pts; /*!< the length of the state vector, maximum number of data points to allocate, and current number of data points */
+  float *s, *sc; /*!< the current state of CBA and the last confidence state */
+  int s_size, max_pts, pts, a; /*!< the length of the state vector, maximum number of data points to allocate, current number of data points, and current action for the agent to execute */
   bool action_complete, autonomous_action; /*!< if the action has been reported by the agent as finished and if the current action was executed autonomously */
-  double dist_thresh; /*!< the distance threshold value */
+  double dist_thresh, dist_mult; /*!< the distance threshold value and distance threshold multiplier */
   std::vector<conf*> conf_thresholds; /*!< confidence threshold values for action label and decision boundary pairs */
 
-  ANNpointArray data; /*!< data points */
+  ANNpointArray ann_data; /*!< data points for ANN */
+  int *labels; /*!< labels for each entry in the data set */
 };
 
 /*!
