@@ -5,3 +5,5 @@ state s
 float32 c
 # The classification label
 int32 l
+# The decision boundary label
+int32 db

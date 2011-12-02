@@ -9,4 +9,5 @@ rosbuild_init()
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 rosbuild_add_executable(cba src/cba.cpp)
-rosbuild_add_executable(cba_test src/cba_test.cpp)
+rosbuild_add_executable(cba_test src/test/cba_test.cpp)
+rosbuild_add_executable(mock_classify src/test/mock_classify.cpp)

@@ -7,7 +7,9 @@
 
 #include <ANN/ANN.h>
 #include <cba/cba.h>
+#include <lfd_common/conf_classification.h>
 #include <lfd_common/state.h>
+#include <limits>
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 #include <vector>
@@ -25,7 +27,8 @@ cba_learner::cba_learner()
   // check for the maximum number of data points to allocate
   ros::param::param<int>(MAX_DATA_POINTS, max_pts, DEFAULT_MAX_POINTS);
 
-  // check for the name of the classifier topics/services
+  // create the classification topics and services
+  classify = node.serviceClient<lfd_common::conf_classification> ("classify");
 
   // initial CBA values
   kd_tree = NULL;
@@ -45,7 +48,7 @@ cba_learner::~cba_learner()
   if (s != NULL)
     free(s);
   // cleanup ANN
-  if(kd_tree != NULL)
+  if (kd_tree != NULL)
     delete kd_tree;
   annClose();
 }
@@ -60,12 +63,48 @@ void cba_learner::step()
   if (action_complete)
   {
     // request a prediction from the classifier
-
+    prediction *p = classify_state(s, s_size);
   }
   else if (autonomous_action)
   {
 
   }
+}
+
+prediction *cba_learner::classify_state(float *s, int size)
+{
+  // allocate the prediction
+  prediction *p = (prediction *)malloc(sizeof(prediction));
+
+  // check for the classifier
+  if (classify.exists())
+  {
+    // create the service request
+    lfd_common::conf_classification cc;
+    for (int i = 0; i < size; i++)
+      cc.request.s.state_vector.push_back(s[i]);
+cout << "CALLING!!" << endl;
+
+    // send the service request
+    classify.call(cc);
+
+    // fill in the struct
+    p->c = cc.response.c;
+    p->l = cc.response.l;
+    p->db = cc.response.db;
+  }
+  else
+  {
+    ROS_WARN("Could not connect to classifier");
+    // fill the prediction with negative infinity confidence
+    p->c = -numeric_limits<float>::infinity();
+    p->db = -1;
+    p->l = -1;
+  }
+
+  cout << p->c << " " << p->l << " " << p->db <<endl;
+
+  return p;
 }
 
 void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg)

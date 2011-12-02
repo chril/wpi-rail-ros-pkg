@@ -25,6 +25,18 @@
  */
 #define DEFAULT_MAX_POINTS 1024
 
+
+/*!
+ * \struct prediction
+ * A prediction contains the classification label, confidence, and decision boundary label for a given classification.
+ */
+typedef struct
+{
+  int l;
+  double c;
+  int db;
+} prediction;
+
 class cba_learner
 {
 public:
@@ -33,12 +45,14 @@ public:
   void step();
 
 private:
+  prediction *classify_state(float *s, int size);
   void state_listener_callback(const lfd_common::state::ConstPtr &msg);
   void a_complete_callback(const std_msgs::Bool::ConstPtr &msg);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
   ros::Subscriber state_listener, a_complete; /*!< the state_listener and a_complete topics */
+  ros::ServiceClient classify; /*!< the classify service */
 
   float *s; /*!< the current state of CBA */
   int s_size, max_pts, pts; /*!< the length of the state vector, maximum number of data points to allocate, and current number of data points */
