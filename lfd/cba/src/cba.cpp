@@ -37,6 +37,7 @@ cba_learner::cba_learner()
   ros::param::param<double>(DIST_THRESH_MULT, dist_mult, DEFAULT_DIST_MULT);
 
   // initial CBA values
+  labels = NULL;
   s = NULL;
   sc = NULL;
   a = -1;
@@ -60,7 +61,8 @@ cba_learner::~cba_learner()
   if (labels != NULL)
     free(labels);
   // cleanup ANN
-  annDeallocPts(ann_data);
+  if (pts > 0)
+    annDeallocPts(ann_data);
   annClose();
 }
 

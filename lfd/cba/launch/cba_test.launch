@@ -5,6 +5,6 @@
 	<!-- Create an instance of each appropriate node -->
 	<node name="cba" pkg="cba" type="cba" respawn="false" output="screen"/>
   	<node name="mock_classify" pkg="cba" type="mock_classify" respawn="false" output="screen"/>
-  	<node name="cba_test" pkg="cba" type="cba_test" respawn="false" output="screen"/>
+  	<node name="mock_state_publisher" pkg="cba" type="mock_state_publisher" respawn="false" output="screen"/>
 </launch>
 
