@@ -24,7 +24,11 @@
  * The default number of max data points to allocate
  */
 #define DEFAULT_MAX_POINTS 1024
-
+/*!
+ * \def ANN_EPSILON
+ * The error bound on ANN
+ */
+#define ANN_EPSILON 0
 
 /*!
  * \struct prediction
@@ -37,6 +41,17 @@ typedef struct
   int db;
 } prediction;
 
+/*!
+ * \struct conf
+ * A confidence threshold value for a given action label and decision boundary pair.
+ */
+typedef struct
+{
+  int l;
+  int db;
+  double thresh;
+} conf;
+
 class cba_learner
 {
 public:
@@ -45,7 +60,9 @@ public:
   void step();
 
 private:
-  prediction *classify_state(float *s, int size);
+  prediction *classify_state();
+  double nearest_neighbor();
+  double conf_thresh(int l, int db);
   void state_listener_callback(const lfd_common::state::ConstPtr &msg);
   void a_complete_callback(const std_msgs::Bool::ConstPtr &msg);
 
@@ -58,9 +75,9 @@ private:
   int s_size, max_pts, pts; /*!< the length of the state vector, maximum number of data points to allocate, and current number of data points */
   bool action_complete, autonomous_action; /*!< if the action has been reported by the agent as finished and if the current action was executed autonomously */
   double dist_thresh; /*!< the distance threshold value */
+  std::vector<conf*> conf_thresholds; /*!< confidence threshold values for action label and decision boundary pairs */
 
   ANNpointArray data; /*!< data points */
-  ANNkd_tree *kd_tree; /*!< search structure for ANN */
 };
 
 /*!

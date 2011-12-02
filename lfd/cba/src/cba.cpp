@@ -31,7 +31,6 @@ cba_learner::cba_learner()
   classify = node.serviceClient<lfd_common::conf_classification> ("classify");
 
   // initial CBA values
-  kd_tree = NULL;
   s = NULL;
   s_size = -1;
   pts = 0;
@@ -48,8 +47,7 @@ cba_learner::~cba_learner()
   if (s != NULL)
     free(s);
   // cleanup ANN
-  if (kd_tree != NULL)
-    delete kd_tree;
+  annDeallocPts(data);
   annClose();
 }
 
@@ -63,7 +61,22 @@ void cba_learner::step()
   if (action_complete)
   {
     // request a prediction from the classifier
-    prediction *p = classify_state(s, s_size);
+    prediction *p = classify_state();
+    // calculate the nearest neighbor distance
+    double d = nearest_neighbor();
+    // check against the thresholds
+    if (p->c > conf_thresh(p->l, p->db) && d < dist_thresh)
+    {
+      // report the action to be executed
+
+    }
+    else
+    {
+      // request a demonstration
+    }
+
+    // cleanup
+    free(p);
   }
   else if (autonomous_action)
   {
@@ -71,7 +84,7 @@ void cba_learner::step()
   }
 }
 
-prediction *cba_learner::classify_state(float *s, int size)
+prediction *cba_learner::classify_state()
 {
   // allocate the prediction
   prediction *p = (prediction *)malloc(sizeof(prediction));
@@ -81,9 +94,8 @@ prediction *cba_learner::classify_state(float *s, int size)
   {
     // create the service request
     lfd_common::conf_classification cc;
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < s_size; i++)
       cc.request.s.state_vector.push_back(s[i]);
-cout << "CALLING!!" << endl;
 
     // send the service request
     classify.call(cc);
@@ -102,9 +114,50 @@ cout << "CALLING!!" << endl;
     p->l = -1;
   }
 
-  cout << p->c << " " << p->l << " " << p->db <<endl;
-
   return p;
+}
+
+double cba_learner::nearest_neighbor()
+{
+  // check if we have any data points yet
+  if (pts == 0)
+    return numeric_limits<float>::infinity();
+  else
+  {
+    // calculate NN using ANN
+    ANNidxArray index = new ANNidx[1];
+    ANNdistArray dists = new ANNdist[1];
+
+    // create the search structure
+    ANNkd_tree *kd_tree = new ANNkd_tree(data, pts, s_size);
+
+    // create the data point
+    ANNpoint pt = annAllocPt(s_size);
+    for (int i = 0; i < s_size; i++)
+      pt[i] = s[i];
+
+    // calculate nearest neighbor
+    kd_tree->annkSearch(pt, 1, index, dists, ANN_EPSILON);
+    // unsquare the distance
+    double d = sqrt(dists[0]);
+
+    // cleanup
+    annDeallocPt(pt);
+    delete kd_tree;
+
+    return d;
+  }
+}
+
+double cba_learner::conf_thresh(int l, int db)
+{
+  // check the thresholds for the given action label and decision boundary pair
+  for (uint i = 0; i < conf_thresholds.size(); i++)
+    if (conf_thresholds.at(i)->l == l && conf_thresholds.at(i)->db == db)
+      return conf_thresholds.at(i)->thresh;
+
+  // no threshold found for the given pair -- we return infinity
+  return numeric_limits<float>::infinity();
 }
 
 void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg)
