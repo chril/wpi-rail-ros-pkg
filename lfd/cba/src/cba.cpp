@@ -19,14 +19,19 @@ using namespace std;
 cba_learner::cba_learner()
 {
   // add subscriptions
-  update_state = node.subscribe<lfd_common::state> ("update_state", 1, &cba_learner::update_state_callback, this);
+  state_listener = node.subscribe<lfd_common::state> ("update_state", 1, &cba_learner::state_listener_callback, this);
   a_complete = node.subscribe<std_msgs::Bool> ("a_complete", 1, &cba_learner::a_complete_callback, this);
+
+  // check for the maximum number of data points to allocate
+  ros::param::param<int>(MAX_DATA_POINTS, max_pts, DEFAULT_MAX_POINTS);
+
+  // check for the name of the classifier topics/services
 
   // initial CBA values
   kd_tree = NULL;
   s = NULL;
   s_size = -1;
-  ros::param::param<int>(MAX_DATA_POINTS, max_pts, DEFAULT_MAX_POINTS);
+  pts = 0;
   action_complete = true;
   autonomous_action = false;
   dist_thresh = 0;
@@ -54,6 +59,7 @@ void cba_learner::step()
   // check if the agent has reported their action finished
   if (action_complete)
   {
+    // request a prediction from the classifier
 
   }
   else if (autonomous_action)
@@ -62,7 +68,7 @@ void cba_learner::step()
   }
 }
 
-void cba_learner::update_state_callback(const lfd_common::state::ConstPtr &msg)
+void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg)
 {
   // set the state size if it is not yet set
   if (s_size == -1)

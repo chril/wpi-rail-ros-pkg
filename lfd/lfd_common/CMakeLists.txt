@@ -7,3 +7,5 @@ rosbuild_init()
 
 #generate messages
 rosbuild_genmsg()
+#generate services
+rosbuild_gensrv()

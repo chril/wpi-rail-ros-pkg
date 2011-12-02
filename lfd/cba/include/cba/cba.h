@@ -33,15 +33,15 @@ public:
   void step();
 
 private:
-  void update_state_callback(const lfd_common::state::ConstPtr &msg);
+  void state_listener_callback(const lfd_common::state::ConstPtr &msg);
   void a_complete_callback(const std_msgs::Bool::ConstPtr &msg);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
-  ros::Subscriber update_state, a_complete; /*!< the update_state and a_complete topics */
+  ros::Subscriber state_listener, a_complete; /*!< the state_listener and a_complete topics */
 
   float *s; /*!< the current state of CBA */
-  int s_size, max_pts; /*!< the size of the state vector and maximum number of data points to allocate */
+  int s_size, max_pts, pts; /*!< the length of the state vector, maximum number of data points to allocate, and current number of data points */
   bool action_complete, autonomous_action; /*!< if the action has been reported by the agent as finished and if the current action was executed autonomously */
   double dist_thresh; /*!< the distance threshold value */
 
