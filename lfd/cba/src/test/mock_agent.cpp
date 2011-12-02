@@ -36,7 +36,7 @@ int main(int argc, char **argv)
   ros::Publisher a_complete = node.advertise<std_msgs::Bool> ("a_complete", 1);
   ros::ServiceServer dem = node.advertiseService("demonstration", demonstration_callback);
 
-  ROS_INFO("Mock Agent  Initialized");
+  ROS_INFO("Mock Agent Initialized");
 
   ros::spin();
 
