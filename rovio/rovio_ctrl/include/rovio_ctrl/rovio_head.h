@@ -51,7 +51,7 @@ private:
 	 * Process the service request and attempt to move the Rovio's head.
 	 *
 	 * \param req the request for the head_ctrl service
-	 * \param argv the response for the head_ctrl service to be filled
+	 * \param resp the response for the head_ctrl service to be filled
 	 * \return if the request was successfully sent to the Rovio
 	 */
 	bool head_ctrl_callback(rovio_shared::head_ctrl::Request &req,

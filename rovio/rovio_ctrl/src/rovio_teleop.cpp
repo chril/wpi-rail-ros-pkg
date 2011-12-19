@@ -1,5 +1,5 @@
 /*!
- * \file rovio_teleop.h
+ * \file rovio_teleop.cpp
  * \brief Allows for control of the Rovio with a joystick.
  *
  * rovio_teleop creates a ROS node that allows the control of a Rovio with a joystick.
