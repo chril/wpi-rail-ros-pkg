@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/cba</url>
   <depend package="std_msgs"/>
+  <depend package="std_srvs"/>
   <depend package="roscpp"/>
   <depend package="lfd_common"/>
   <depend package="ann"/>

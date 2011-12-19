@@ -40,7 +40,7 @@ bool classify_callback(lfd_common::conf_classification::Request &req, lfd_common
   // let confidence be based on the number of points out of the 1562575 possible states
   resp.c = ((float)data.size()) / 1562575.0;
 
-  // now randomly change the label
+  // now randomly change the label to create some noise
   if ((rand() % 50) == 0)
   {
     resp.l = ((rand() % 5) + 1) * 5;
@@ -52,6 +52,7 @@ bool classify_callback(lfd_common::conf_classification::Request &req, lfd_common
 
 void add_point_callback(const lfd_common::classification_point::ConstPtr &msg)
 {
+
   // check if we have a new point
   for (uint i = 0; i < data.size(); i++)
     if (data.at(i)[0] == msg->s.state_vector.at(0) && data.at(i)[1] == msg->s.state_vector.at(1) && data.at(i)[2]
@@ -62,6 +63,7 @@ void add_point_callback(const lfd_common::classification_point::ConstPtr &msg)
   float *data_point = (float *)malloc(sizeof(float) * msg->s.state_vector.size());
   for (uint i = 0; i < msg->s.state_vector.size(); i++)
     data_point[i] = msg->s.state_vector.at(i);
+  data.push_back(data_point);
 
   // check if the labels match
   if (msg->s.state_vector.at(2) < 5)

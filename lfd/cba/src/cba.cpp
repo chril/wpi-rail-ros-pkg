@@ -13,8 +13,8 @@
 #include <lfd_common/state.h>
 #include <limits>
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 #include <std_msgs/Int32.h>
+#include <std_srvs/Empty.h>
 #include <vector>
 
 #include <iostream>
@@ -25,9 +25,9 @@ cba_learner::cba_learner()
 {
   // add subscriptions and services
   execute = node.advertise<std_msgs::Int32> ("execute", 1);
-  add_point = node.advertise<lfd_common::classification_point> ("add_point", -1);
+  add_point = node.advertise<lfd_common::classification_point> ("add_point", 25);
   state_listener = node.subscribe<lfd_common::state> ("state_listener", 1, &cba_learner::state_listener_callback, this);
-  a_complete = node.subscribe<std_msgs::Bool> ("a_complete", 1, &cba_learner::a_complete_callback, this);
+  a_complete = node.advertiseService("a_complete", &cba_learner::a_complete_callback, this);
   classify = node.serviceClient<lfd_common::conf_classification> ("classify");
   demonstration = node.serviceClient<lfd_common::demonstration> ("demonstration");
 
@@ -77,8 +77,12 @@ void cba_learner::step()
   {
     // request a prediction from the classifier
     prediction *p = classify_state();
+
     // calculate the nearest neighbor distance
     double d = nearest_neighbor();
+
+    cout << p->c << " " << d << endl;
+
     // check against the thresholds
     if (p->c > conf_thresh(p->l, p->db) && d < dist_thresh)
     {
@@ -145,7 +149,8 @@ void cba_learner::step()
   }
   else if (autonomous_action)
   {
-
+    cout << "autonomous_action" << endl;
+    return;
   }
 }
 
@@ -169,8 +174,6 @@ prediction *cba_learner::classify_state()
     p->c = cc.response.c;
     p->l = cc.response.l;
     p->db = cc.response.db;
-
-    cout << p->c << " " << p->l << " " << p->db << endl;
   }
   else
   {
@@ -241,7 +244,6 @@ void cba_learner::update_thresholds()
   // calculate NN using ANN
   ANNidxArray index = new ANNidx[2];
   ANNdistArray dists = new ANNdist[2];
-
   // create the search structure
   ANNkd_tree *kd_tree = new ANNkd_tree(ann_data, pts, s_size);
 
@@ -314,7 +316,7 @@ void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg
     // allocate space for the states and data sets
     s = (float *)malloc(sizeof(float) * s_size);
     sc = (float *)malloc(sizeof(float) * s_size);
-    labels = (int *)malloc(sizeof(int) * s_size);
+    labels = (int *)malloc(sizeof(int32_t) * max_pts);
   }
 
   // check if the state sizes match
@@ -326,13 +328,14 @@ void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg
     s[i] = msg->state_vector[i];
 }
 
-void cba_learner::a_complete_callback(const std_msgs::Bool::ConstPtr &msg)
+bool cba_learner::a_complete_callback(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp)
 {
   // set the action complete value
-  action_complete = msg->data;
+  action_complete = true;
   // if the action is complete, it cannot be autonomous anymore
-  if (action_complete)
-    autonomous_action = false;
+  autonomous_action = false;
+
+  return true;
 }
 
 int main(int argc, char **argv)

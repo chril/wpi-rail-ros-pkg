@@ -11,7 +11,7 @@
 #include <ANN/ANN.h>
 #include <ros/ros.h>
 #include <lfd_common/state.h>
-#include <std_msgs/Bool.h>
+#include <std_srvs/Empty.h>
 #include <vector>
 
 /*!
@@ -76,13 +76,14 @@ private:
   double conf_thresh(int l, int db);
   void update_thresholds();
   void state_listener_callback(const lfd_common::state::ConstPtr &msg);
-  void a_complete_callback(const std_msgs::Bool::ConstPtr &msg);
+  bool a_complete_callback(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
   ros::Publisher execute, add_point; /*!< the execute and add_point topics */
-  ros::Subscriber state_listener, a_complete; /*!< the state_listener and a_complete topics */
+  ros::Subscriber state_listener; /*!< the state_listener topic */
   ros::ServiceClient classify, demonstration; /*!< the classify and demonstration services */
+  ros::ServiceServer a_complete; /*!< the a_complete service */
 
   float *s, *sc; /*!< the current state of CBA and the last confidence state */
   int s_size, max_pts, pts, a; /*!< the length of the state vector, maximum number of data points to allocate, current number of data points, and current action for the agent to execute */
@@ -91,7 +92,7 @@ private:
   std::vector<conf*> conf_thresholds; /*!< confidence threshold values for action label and decision boundary pairs */
 
   ANNpointArray ann_data; /*!< data points for ANN */
-  int *labels; /*!< labels for each entry in the data set */
+  int32_t *labels; /*!< labels for each entry in the data set */
 };
 
 /*!
