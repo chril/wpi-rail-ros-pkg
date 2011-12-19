@@ -1,8 +1,6 @@
 <package>
-  <description brief="cba">
-
-     cba
-
+  <description brief="Confidence-Based Autonomy (CBA) implementation for ROS">
+ 	An implementation of the Learning from Demonstration algorithm Confidence-Based Autonomy (CBA) built for ROS.
   </description>
   <author>Russell Toris</author>
   <license>BSD</license>

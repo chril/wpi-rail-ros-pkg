@@ -1,8 +1,11 @@
-/*
- * cba.h
+/*!
+ * \file cba.h
+ * \brief Confidence-Based Autonomy (CBA) implementation for ROS
  *
- *  Created on: Nov 22, 2011
- *      Author: rctoris
+ * cba provides and implementation of the Learning from Demonstration algorithm Confidence-Based Autonomy (CBA) built for ROS.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date December 19, 2011
  */
 
 #ifndef CBA_H_
@@ -63,19 +66,91 @@ typedef struct
   double thresh;
 } conf;
 
+/*!
+ * \class cba_learner
+ * \brief Object used to handle communication between other ROS nodes and CBA.
+ *
+ * The cba_learner handles communication between the agent, human, and CBA via ROS. ROS nodes and services are created and maintained within this object.
+ */
 class cba_learner
 {
 public:
+  /*!
+   * \brief Creates a cba_learner using optional ROS parameters.
+   *
+   * Creates a cba_learner object that will allocate most of the necessary resources needed and initialize all ROS topics/services. Optional parameters can be supplied via ROS parameters to set the data set size and distance threshold multiplier.
+   */
   cba_learner();
+
+  /*!
+   * \brief cba_learner destructor.
+   *
+   * Frees the resources used by the CBA learner.
+   */
   virtual ~cba_learner();
+
+  /*!
+   * \brief Iterates once trough the CBA algorithm.
+   *
+   * Used to iterate once through the CBA algorithm. This loop will update the learner and handle any ROS messages/service requests that must be made.
+   */
   void step();
 
 private:
+  /*!
+   * \brief Used to classify the current state.
+   *
+   * Query the classifier for the label of the current state. If the communication to the classifier cannot be made, a label of -1 is given with negative infinity confidence.
+   *
+   * \return the prediction information for the current state
+   */
   prediction *classify_state();
+
+  /*!
+   * \brief Used to calculate the nearest neighbor to the current state.
+   *
+   * Calculate and return the nearest neighbor distance to the current state using ANN. If no data points exist in the data set, infinity is returned.
+   *
+   * \return the nearest neighbor distance to the current state
+   */
   double nearest_neighbor();
+
+  /*!
+   * \brief Retrieve the confidence threshold for the given label and decision boundary pair.
+   *
+   * Find the confidence threshold for the given label and decision boundary pair. If no threshold value has been set for this pair yet, infinity is returned (the initial threshold).
+   *
+   * \param l the label value
+   * \param db the decision boundary label value
+   * \return the confidence threshold for the given label and decision boundary pair
+   */
   double conf_thresh(int l, int db);
+
+  /*!
+   * \brief Update the distance and confidence thresholds.
+   *
+   * Update the distance and confidence thresholds as defined by the CBA algorithm.
+   */
   void update_thresholds();
+
+  /*!
+   * \brief state_listener topic callback function
+   *
+   * Copies the given state vector into a global buffer. If this is the first call to this function, several buffer resources are allocated based on the size of the state vector.
+   *
+   * \param msg the current state vector of the agent
+   */
   void state_listener_callback(const lfd_common::state::ConstPtr &msg);
+
+  /*!
+   * \brief a_complete service callback function
+   *
+   * Set the action complete flag to true and autonomous action flag to false.
+   *
+   * \param req the request for the a_complete service; this does not contain any information for this service
+   * \param resp the response for the a_complete service; this does not contain any information for this service
+   * \return returns true once completed
+   */
   bool a_complete_callback(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */

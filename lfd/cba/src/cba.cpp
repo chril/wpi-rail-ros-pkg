@@ -1,8 +1,11 @@
-/*
- * cba.cpp
+/*!
+ * \file cba.cpp
+ * \brief Confidence-Based Autonomy (CBA) implementation for ROS
  *
- *  Created on: Nov 22, 2011
- *      Author: rctoris
+ * cba provides and implementation of the Learning from Demonstration algorithm Confidence-Based Autonomy (CBA) built for ROS.
+ *
+ * \author Russell Toris, WPI - rctoris@wpi.edu
+ * \date December 19, 2011
  */
 
 #include <ANN/ANN.h>
@@ -17,15 +20,13 @@
 #include <std_srvs/Empty.h>
 #include <vector>
 
-#include <iostream>
-
 using namespace std;
 
 cba_learner::cba_learner()
 {
   // add subscriptions and services
   execute = node.advertise<std_msgs::Int32> ("execute", 1);
-  add_point = node.advertise<lfd_common::classification_point> ("add_point", 25);
+  add_point = node.advertise<lfd_common::classification_point> ("add_point", -1);
   state_listener = node.subscribe<lfd_common::state> ("state_listener", 1, &cba_learner::state_listener_callback, this);
   a_complete = node.advertiseService("a_complete", &cba_learner::a_complete_callback, this);
   classify = node.serviceClient<lfd_common::conf_classification> ("classify");
@@ -80,8 +81,6 @@ void cba_learner::step()
 
     // calculate the nearest neighbor distance
     double d = nearest_neighbor();
-
-    cout << p->c << " " << d << endl;
 
     // check against the thresholds
     if (p->c > conf_thresh(p->l, p->db) && d < dist_thresh)
@@ -149,8 +148,7 @@ void cba_learner::step()
   }
   else if (autonomous_action)
   {
-    cout << "autonomous_action" << endl;
-    return;
+
   }
 }
 
