@@ -1,5 +1,5 @@
 /*!
- * \file rovio_audio.h
+ * \file rovio_audio.cpp
  * \brief Communication node to the Rovio's audio devices.
  *
  * rovio_audio creates a ROS node that listens for the name of a .wav file as a string. The file is then streamed and played on the Rovio's speaker.
