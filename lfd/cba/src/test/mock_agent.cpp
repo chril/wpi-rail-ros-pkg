@@ -5,12 +5,12 @@
  *      Author: rctoris
  */
 
+#include <iostream>
 #include <lfd_common/demonstration.h>
+#include <lfd_common/action_complete.h>
 #include <std_msgs/Int32.h>
 #include <ros/ros.h>
-#include <std_srvs/Empty.h>
-
-#include <iostream>
+#include <time.h>
 
 using namespace std;
 
@@ -27,7 +27,22 @@ void execute_callback(const std_msgs::Int32::ConstPtr &msg)
 
   // report the action now done
   cout << "execution finished!" << endl;
-  std_srvs::Empty srv;
+
+  lfd_common::action_complete srv;
+  // randomly send a correction
+  if ((rand() % 10) == 0)
+  {
+    // based on what the mock classifier is going to do, give a different correction value
+    srv.request.a = -100;
+
+    cout << "Correction given: '" << srv.request.a << "'." << endl;
+    // set the valid flag
+    srv.request.valid_correction = true;
+  }
+  else
+    // set the valid flag
+    srv.request.valid_correction = false;
+  // send the service
   a_complete.call(srv);
 }
 
@@ -67,10 +82,13 @@ int main(int argc, char **argv)
 
   // create services and topics
   ros::Subscriber execute = node.subscribe<std_msgs::Int32> ("execute", 1, execute_callback);
-  a_complete = node.serviceClient<std_srvs::Empty> ("a_complete");
+  a_complete = node.serviceClient<lfd_common::action_complete> ("a_complete");
   ros::ServiceServer dem = node.advertiseService("demonstration", demonstration_callback);
 
   ROS_INFO("Mock Agent Initialized");
+
+  // used to randomly provide corrections
+  srand(time(NULL));
 
   ros::spin();
 

@@ -10,6 +10,7 @@
 
 #include <ANN/ANN.h>
 #include <cba/cba.h>
+#include <lfd_common/action_complete.h>
 #include <lfd_common/classification_point.h>
 #include <lfd_common/conf_classification.h>
 #include <lfd_common/demonstration.h>
@@ -17,7 +18,6 @@
 #include <limits>
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
-#include <std_srvs/Empty.h>
 #include <vector>
 
 using namespace std;
@@ -27,9 +27,11 @@ cba_learner::cba_learner()
   // add subscriptions and services
   execute = node.advertise<std_msgs::Int32> ("execute", 1);
   add_point = node.advertise<lfd_common::classification_point> ("add_point", -1);
+  change_point = node.advertise<lfd_common::classification_point> ("change_point", -1);
   state_listener = node.subscribe<lfd_common::state> ("state_listener", 1, &cba_learner::state_listener_callback, this);
   a_complete = node.advertiseService("a_complete", &cba_learner::a_complete_callback, this);
   classify = node.serviceClient<lfd_common::conf_classification> ("classify");
+  correction = node.serviceClient<lfd_common::demonstration> ("correction");
   demonstration = node.serviceClient<lfd_common::demonstration> ("demonstration");
 
   // check for the maximum number of data points to allocate
@@ -111,27 +113,64 @@ void cba_learner::step()
         // check if the user provided a demonstration
         if (dem.response.valid)
         {
-          // update the data set
-          if (pts == max_pts)
-            ROS_WARN("Too many data points -- latest point ignored.");
-          else
+          // check if we already have this data point in our set
+          bool duplicate;
+          for (int i = 0; i < pts; i++)
           {
-            // add the data to the ANN set
-            for (int i = 0; i < s_size; i++)
-              ann_data[pts][i] = s[i];
-            // set the label
-            labels[pts] = dem.response.a;
-            pts++;
+            for (int j = 0; j < s_size; j++)
+              if (ann_data[i][j] == s[j])
+                duplicate = true;
+              else
+              {
+                duplicate = false;
+                break;
+              }
+            if (duplicate)
+            {
+              // check if the label was changed
+              if (labels[i] != dem.response.a)
+              {
+                // change the label
+                labels[i] = dem.response.a;
+                //update the point in the classifier
+                lfd_common::classification_point cp;
+                for (int i = 0; i < s_size; i++)
+                  cp.s.state_vector.push_back(s[i]);
+                cp.l = dem.response.a;
+                change_point.publish(cp);
 
-            // send the point to the classifier
-            lfd_common::classification_point cp;
-            for (int i = 0; i < s_size; i++)
-              cp.s.state_vector.push_back(s[i]);
-            cp.l = dem.response.a;
-            add_point.publish(cp);
+                // update the thresholds
+                update_thresholds();
+              }
+              break;
+            }
+          }
 
-            // update the thresholds
-            update_thresholds();
+          // new data point
+          if (!duplicate)
+          {
+            // update the data set
+            if (pts == max_pts)
+              ROS_WARN("Too many data points -- latest point ignored.");
+            else
+            {
+              // add the data to the ANN set
+              for (int i = 0; i < s_size; i++)
+                ann_data[pts][i] = s[i];
+              // set the label
+              labels[pts] = dem.response.a;
+              pts++;
+
+              // send the point to the classifier
+              lfd_common::classification_point cp;
+              for (int i = 0; i < s_size; i++)
+                cp.s.state_vector.push_back(s[i]);
+              cp.l = dem.response.a;
+              add_point.publish(cp);
+
+              // update the thresholds
+              update_thresholds();
+            }
           }
 
           // report the action to be executed
@@ -145,10 +184,6 @@ void cba_learner::step()
     }
     // cleanup
     free(p);
-  }
-  else if (autonomous_action)
-  {
-
   }
 }
 
@@ -326,13 +361,77 @@ void cba_learner::state_listener_callback(const lfd_common::state::ConstPtr &msg
     s[i] = msg->state_vector[i];
 }
 
-bool cba_learner::a_complete_callback(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp)
+bool cba_learner::a_complete_callback(lfd_common::action_complete::Request &req,
+                                      lfd_common::action_complete::Response &resp)
 {
   // set the action complete value
   action_complete = true;
+
+  // check if a correction was given for an autonomous action
+  if (autonomous_action && req.valid_correction)
+  {
+    // find the data point
+    bool duplicate;
+    for (int i = 0; i < pts; i++)
+    {
+      for (int j = 0; j < s_size; j++)
+        if (ann_data[i][j] == sc[j])
+          duplicate = true;
+        else
+        {
+          duplicate = false;
+          break;
+        }
+      if (duplicate)
+      {
+        // check if the label was changed
+        if (labels[i] != req.a)
+        {
+          // change the label
+          labels[i] = req.a;
+          //update the point in the classifier
+          lfd_common::classification_point cp;
+          for (int i = 0; i < s_size; i++)
+            cp.s.state_vector.push_back(s[i]);
+          cp.l = req.a;
+          change_point.publish(cp);
+
+          // update the thresholds
+          update_thresholds();
+        }
+      }
+    }
+
+    // new data point
+    if (!duplicate)
+    {
+      // update the data set
+      if (pts == max_pts)
+        ROS_WARN("Too many data points -- latest point ignored.");
+      else
+      {
+        // add the data to the ANN set
+        for (int i = 0; i < s_size; i++)
+          ann_data[pts][i] = s[i];
+        // set the label
+        labels[pts] = req.a;
+        pts++;
+
+        // send the point to the classifier
+        lfd_common::classification_point cp;
+        for (int i = 0; i < s_size; i++)
+          cp.s.state_vector.push_back(s[i]);
+        cp.l = req.a;
+        add_point.publish(cp);
+
+        // update the thresholds
+        update_thresholds();
+      }
+    }
+  }
+
   // if the action is complete, it cannot be autonomous anymore
   autonomous_action = false;
-
   return true;
 }
 

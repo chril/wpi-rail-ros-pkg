@@ -5,13 +5,12 @@
  *      Author: rctoris
  */
 
+#include <iostream>
 #include <lfd_common/classification_point.h>
 #include <lfd_common/conf_classification.h>
 #include <ros/ros.h>
 #include <time.h>
 #include <vector>
-
-#include <iostream>
 
 using namespace std;
 
@@ -65,17 +64,34 @@ void add_point_callback(const lfd_common::classification_point::ConstPtr &msg)
     data_point[i] = msg->s.state_vector.at(i);
   data.push_back(data_point);
 
-  // check if the labels match
-  if (msg->s.state_vector.at(2) < 5)
-    assert(msg->l == 5);
-  else if (msg->s.state_vector.at(2) < 10)
-    assert(msg->l == 10);
-  else if (msg->s.state_vector.at(2) < 15)
-    assert(msg->l == 15);
-  else if (msg->s.state_vector.at(2) < 20)
-    assert(msg->l == 20);
-  else
-    assert(msg->l == 25);
+  // check if the labels match (-100 is the default correction value)
+  if (msg->l != -100)
+    if (msg->s.state_vector.at(2) < 5)
+      assert(msg->l == 5);
+    else if (msg->s.state_vector.at(2) < 10)
+      assert(msg->l == 10);
+    else if (msg->s.state_vector.at(2) < 15)
+      assert(msg->l == 15);
+    else if (msg->s.state_vector.at(2) < 20)
+      assert(msg->l == 20);
+    else
+      assert(msg->l == 25);
+}
+
+void change_point_callback(const lfd_common::classification_point::ConstPtr &msg)
+{
+  // check if we have this point
+  for (uint i = 0; i < data.size(); i++)
+    if (data.at(i)[0] == msg->s.state_vector.at(0) && data.at(i)[1] == msg->s.state_vector.at(1) && data.at(i)[2]
+        == msg->s.state_vector.at(2))
+    {
+      cout << "\"Changed\" data point successfully!" << endl;
+      return;
+    }
+
+  // point never found
+  cout << "[ERROR]: Data point provided in 'change_point' does not exist!";
+  exit(-1);
 }
 
 int main(int argc, char **argv)
@@ -88,6 +104,8 @@ int main(int argc, char **argv)
   // create services and topics
   ros::ServiceServer classify = node.advertiseService("classify", classify_callback);
   ros::Subscriber add_point = node.subscribe<lfd_common::classification_point> ("add_point", -1, add_point_callback);
+  ros::Subscriber change_point = node.subscribe<lfd_common::classification_point> ("change_point", -1,
+                                                                                   change_point_callback);
 
   // used to randomly classify incorrectly
   srand(time(NULL));

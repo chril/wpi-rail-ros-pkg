@@ -13,8 +13,8 @@
 
 #include <ANN/ANN.h>
 #include <ros/ros.h>
+#include <lfd_common/action_complete.h>
 #include <lfd_common/state.h>
-#include <std_srvs/Empty.h>
 #include <vector>
 
 /*!
@@ -145,19 +145,19 @@ private:
   /*!
    * \brief a_complete service callback function
    *
-   * Set the action complete flag to true and autonomous action flag to false.
+   * Set the action complete flag to true and autonomous action flag to false. Furthermore, if the action completed was autonomous and a correction was given by the user, the model is updated appropriately.
    *
-   * \param req the request for the a_complete service; this does not contain any information for this service
+   * \param req the request for the a_complete service
    * \param resp the response for the a_complete service; this does not contain any information for this service
    * \return returns true once completed
    */
-  bool a_complete_callback(std_srvs::Empty::Request &req, std_srvs::Empty::Response &resp);
+  bool a_complete_callback(lfd_common::action_complete::Request &req, lfd_common::action_complete::Response &resp);
 
   ros::NodeHandle node; /*!< a handle for this ROS node */
 
-  ros::Publisher execute, add_point; /*!< the execute and add_point topics */
+  ros::Publisher execute, add_point, change_point; /*!< the execute, add_point, and change_point topics */
   ros::Subscriber state_listener; /*!< the state_listener topic */
-  ros::ServiceClient classify, demonstration; /*!< the classify and demonstration services */
+  ros::ServiceClient classify, correction, demonstration; /*!< the classify, correction, and demonstration services */
   ros::ServiceServer a_complete; /*!< the a_complete service */
 
   float *s, *sc; /*!< the current state of CBA and the last confidence state */
