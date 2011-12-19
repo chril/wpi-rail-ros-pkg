@@ -27,7 +27,7 @@ public:
   /*!
    * \brief Creates an audio_controller using ROS parameters.
    *
-   * Creates a audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
+   * Creates an audio_controller object that can be used to stream .wav files to the Rovio. A valid username, password, and host must be set as ROS parameters.
    */
   audio_controller();
 
